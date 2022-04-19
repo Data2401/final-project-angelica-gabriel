@@ -1,0 +1,51 @@
+---
+title: "Baseball Playoff Series Information"
+author: "Angelica Martinez & Gabriel Rodriguez"
+date: "4/14/2022"
+output: html_document
+---
+
+```{r}
+
+# Libraries we will be using for this exploration
+
+library(tidyverse)
+library(ggplot2)
+library(Lahman)
+
+```
+
+
+
+```{r}
+
+# The 'BattingPost' data frame conatins batting information for each MLB postseaon game for years
+# 1884-2020.
+view(BattingPost)
+BattingPost <-BattingPost
+
+# Let's take a look at summarized statistics for each different playoff series
+
+# Remove all observations for which data is missing. Rename 'round' column to 'Playoff Series'
+PostSeries_Batting <- BattingPost %>% 
+  na.exclude() %>% 
+  rename("Playoff_Series" = round)
+
+# Add columns that calculate more batting statistics
+PostSeries_Batting <- PostSeries_Batting %>% 
+  filter(AB > 0) %>%                                              # We only want batting info for players who had at least one AB
+  mutate(X1B = (H - (X2B + X3B + HR)),                            # Add a column for singles hit
+         TB = (1*X1B) + (2*X2B) + (3*X3B) + (4*HR),               # Add a column for totatl bases
+         AVG = H/AB,                                              # Add a batting average column
+         OBP = (H + HBP + BB + IBB) / (AB + BB + IBB + HBP + SF), # Add an on-base percentage column
+         SLG = TB / AB,                                           # Add a slugging percentage column
+         OPS = OBP + SLG)                                         # Add an on-base plus slugging column
+
+         
+         
+# Remove base running statistics. We won't need those for batting statistics purposes
+PostSeries_Batting %>% select(-SB, -)
+
+
+
+```
