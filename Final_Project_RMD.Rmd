@@ -9,6 +9,7 @@ output: html_document
 
 # Libraries we will be using for this exploration
 
+library(tibble)
 library(tidyverse)
 library(ggplot2)
 library(Lahman)
@@ -17,9 +18,11 @@ library(Lahman)
 
 
 
+
+
 ```{r}
 
-# The 'BattingPost' data frame conatins batting information for each MLB postseaon game for years
+# The 'BattingPost' data frame contains batting information for each MLB postseason game for years
 # 1884-2020.
 view(BattingPost)
 BattingPost <-BattingPost
@@ -44,8 +47,66 @@ PostSeries_Batting <- PostSeries_Batting %>%
          
          
 # Remove base running statistics. We won't need those for batting statistics purposes
-PostSeries_Batting %>% select(-SB, -)
+PostSeries_Batting <- PostSeries_Batting %>% select(-SB, -CS)
 
+# Rearrange columns
+PostSeries_Batting <- PostSeries_Batting %>%
+  relocate(TB, AVG, OBP, SLG, OPS, .after = BB)
+
+```
+
+
+```{r}
+# Let's focus on the expanded wild card era years 2012-2019
+# Compare the batting average among each playoff series
+
+# This function takes in our 'PostSeries_Batting' df, groups_by 'Playoff_Series', then
+# summarizes the mean of the chosen stat for each different playoff series, within the 
+# chosen start_year and end_year
+Stat_Mean <- function(dataset, Playoff_Series, stat_name, start_year, end_year) {
+  Playoff_Series <- enquo(Playoff_Series)
+  stat_name <- enquo(stat_name)
+  
+  PostSeries_Batting %>%
+  filter(yearID >= start_year & yearID <= end_year) %>%
+  group_by(!!Playoff_Series) %>%
+  summarize(series_mean = mean(!!stat_name)) %>%
+  arrange(-series_mean)
+}
+  
+# Use the 'Stat_Mean' function to calculate the mean AVG, OBP, SLG, and OPS
+# for each playoff series for years 2012-2019
+Series_AVG <- Stat_Mean(PostSeries_Batting, Playoff_Series, AVG, 2012, 2019)  
+Series_OBP <- Stat_Mean(PostSeries_Batting, Playoff_Series, OBP, 2012, 2019)  
+Series_SLG <- Stat_Mean(PostSeries_Batting, Playoff_Series, SLG, 2012, 2019)
+Series_OPS <- Stat_Mean(PostSeries_Batting, Playoff_Series, OPS, 2012, 2019)
+ 
+```
+
+```{r}
+# Plot the results
+Series_AVG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col()
+Series_OBP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col()
+Series_SLG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col()
+Series_OPS %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col()
+```
+
+
+
+
+```{r}
+
+# The 'PitchingPost' data frame contains pitching information for each MLB postseason game for years
+# 1884-2020.
+view(PitchingPost)
+PitchingPost <-PitchingPost
+
+# Let's take a look at summarized statistics for each different playoff series
+
+# Remove all observations for which data is missing. Rename 'round' column to 'Playoff Series'
+PostSeries_Pitching <- PitchingPost %>% 
+  na.exclude() %>% 
+  rename("Playoff_Series" = round)
 
 
 ```
