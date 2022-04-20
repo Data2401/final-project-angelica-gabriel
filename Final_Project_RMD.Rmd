@@ -202,3 +202,21 @@ Series_WHIP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series
 
 
 ```
+
+Now that we have the means for these batting/pitching statistics, we can compare them to the means of those statistics for 
+teams that won each round. 
+
+
+```{r}
+
+# Determine the Winning and Losing Teams for each playoff series during 2012-2019
+SeriesPost_2012_2019 <- SeriesPost %>% filter(yearID >= 2012 & yearID <= 2019)
+
+# Filter our 'PostSeries_Batting' data for years 2012-2019
+Bat_2012_2019 <- PostSeries_Batting %>% filter(yearID >= 2012 & yearID <=2019)
+
+left_join(Bat_2012_2019, SeriesPost_2012_2019, by = c("teamID" = "teamIDwinner"))
+
+
+```
+
