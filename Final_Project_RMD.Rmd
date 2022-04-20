@@ -17,7 +17,7 @@ library(Lahman)
 ```
 
 
-
+##Postseason Batting Data
 
 
 ```{r}
@@ -34,6 +34,9 @@ PostSeries_Batting <- BattingPost %>%
   na.exclude() %>% 
   rename("Playoff_Series" = round)
 
+```
+
+```{r}
 # Add columns that calculate more batting statistics
 PostSeries_Batting <- PostSeries_Batting %>% 
   filter(AB > 0) %>%                                              # We only want batting info for players who had at least one AB
@@ -92,7 +95,7 @@ Series_OPS %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_
 ```
 
 
-
+##Postseason Pitching Data
 
 ```{r}
 
@@ -108,5 +111,16 @@ PostSeries_Pitching <- PitchingPost %>%
   na.exclude() %>% 
   rename("Playoff_Series" = round)
 
+
+```
+
+
+```{r}
+# Add columns that calculate more pitching statistics
+PostSeries_Pitching <- PostSeries_Pitching %>% 
+  mutate(IP = IPouts / 3,                    # Calculate the number of innings pitched
+         WHIP = (H + BB + IBB) / IP)         # Calculate the walks/hits per inning pitched
+
+         
 
 ```
