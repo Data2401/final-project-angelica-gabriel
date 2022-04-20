@@ -1,6 +1,6 @@
 ---
 title: "Baseball Playoff Series Information"
-author: "Angelica Martinez & Gabriel Rodriguez"
+author: "Angelica Morales & Gabriel Rodriguez"
 date: "4/14/2022"
 output: html_document
 ---
@@ -112,10 +112,28 @@ Series_OPS <- Stat_Mean(PostSeries_Batting, Playoff_Series, OPS, 2012, 2019)
 
 ```{r}
 # Plot the results
-Series_AVG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col()
-Series_OBP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col()
-Series_SLG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col()
-Series_OPS %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col()
+Series_AVG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
+  ggtitle("Batting Average Mean for Individual Playoff Series (2012-2019") +
+  xlab("Playoff Series") +
+  ylab("Batting Average")
+
+
+Series_OBP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
+  ggtitle("On-Base Percentage Mean for Individual Playoff Series (2012-2019") +
+  xlab("Playoff Series") +
+  ylab("On-base Percentage")
+
+
+Series_SLG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
+  ggtitle("Slugging Percentage Mean for Individual Playoff Series (2012-2019") +
+  xlab("Playoff Series") +
+  ylab("Slugging Percentage")
+
+
+Series_OPS %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
+  ggtitle("On-base Plus Slugging Mean for Individual Playoff Series (2012-2019") +
+  xlab("Playoff Series") +
+  ylab("On-base Plus Slugging")
 ```
 
 
@@ -136,6 +154,7 @@ PostSeries_Pitching <- PitchingPost %>%
   rename("Playoff_Series" = round)
 
 
+
 ```
 
 
@@ -143,12 +162,9 @@ PostSeries_Pitching <- PitchingPost %>%
 # Add columns that calculate more pitching statistics
 PostSeries_Pitching <- PostSeries_Pitching %>% 
   mutate(IP = IPouts / 3,                    # Calculate the number of innings pitched
-         WHIP = (H + BB + IBB) / IP)         # Calculate the walks/hits per inning pitched
+         WHIP = (H + BB + IBB) / IP) %>%     # Calculate the walks/hits per inning pitched
+  filter(IP > 0)       
 
-PostSeries_Pitching_2012_2019 <- PostSeries_Pitching %>% 
-  filter(yearID >= 2012 & yearID <= 2019)
-
-         
 
 ```
 
@@ -164,3 +180,25 @@ Series_WHIP <- Stat_Mean(PostSeries_Pitching, Playoff_Series, WHIP, 2012, 2019)
 
 ```
 
+```{r}
+# Plot the results
+Series_ERA %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
+  ggtitle("Earned Run Average for Individual Playoff Series (2012-2019") +
+  xlab("Playoff Series") +
+  ylab("Earned Run Average (ERA)")
+
+
+Series_IP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
+  ggtitle("Innings Pitched Mean for Individual Playoff Series (2012-2019") +
+  xlab("Playoff Series") +
+  ylab("Innings Pitched (IP)")
+
+
+Series_WHIP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
+  ggtitle("Walks/Hits Per IP Mean for Individual Playoff Series (2012-2019") +
+  xlab("Playoff Series") +
+  ylab("Walks/Hits Per Inning Pitched (WHIP)")
+
+
+
+```
