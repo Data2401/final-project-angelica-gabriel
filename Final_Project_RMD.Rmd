@@ -5,6 +5,11 @@ date: "4/14/2022"
 output: html_document
 ---
 
+# Introduction
+
+
+
+
 ```{r}
 
 # Libraries we will be using for this exploration
@@ -17,7 +22,15 @@ library(Lahman)
 ```
 
 
-##Postseason Batting Data
+## Postseason Batting Data
+
+Before we can use the 'BattingPost' data table we need clean it up a bit. First we want to remove any missing data. There is no 
+data available for the 'CS', 'HBP', 'SH', 'SF', and 'GIDP' columns for years 1884-1892, so we will remove data for these years. 
+We will also rename the 'round' column to 'Playoff_Series' to make it more understandable.
+
+Second, we will add more relevant baseball calculations that will help us better analyze batting performance.
+
+Finally we will take a look at the means of those statistic for all teams, for each individual playoff series from 2012-2019. 
 
 
 ```{r}
@@ -35,6 +48,13 @@ PostSeries_Batting <- BattingPost %>%
   rename("Playoff_Series" = round)
 
 ```
+
+This table already contains a lot of relevant baseball statistics. However it is missing important calculations that are commonly
+used to determine batting performance.
+
+Fortunately, the data needed to perform these calculations is already in the table, so all we have to do is add columns that perform
+these calculations. More specifically, we will want to look at batting average (AVG), on-base percentage (OBP), slugging (SLG), and
+on-base plus slugging (OPS).
 
 ```{r}
 # Add columns that calculate more batting statistics
@@ -59,6 +79,9 @@ PostSeries_Batting <- PostSeries_Batting %>%
 ```
 
 
+**Overall means for batting average (AVG), on-base percentage (OBP), slugging (SLG),** 
+**and on-base plus slugging (OPS), for each individual postseason series during the** 
+**expanded wild card era (2012-2019)**
 ```{r}
 # Let's focus on the expanded wild card era years 2012-2019
 # Compare the batting average among each playoff series
@@ -66,11 +89,12 @@ PostSeries_Batting <- PostSeries_Batting %>%
 # This function takes in our 'PostSeries_Batting' df, groups_by 'Playoff_Series', then
 # summarizes the mean of the chosen stat for each different playoff series, within the 
 # chosen start_year and end_year
+
 Stat_Mean <- function(dataset, Playoff_Series, stat_name, start_year, end_year) {
   Playoff_Series <- enquo(Playoff_Series)
   stat_name <- enquo(stat_name)
   
-  PostSeries_Batting %>%
+  dataset %>%
   filter(yearID >= start_year & yearID <= end_year) %>%
   group_by(!!Playoff_Series) %>%
   summarize(series_mean = mean(!!stat_name)) %>%
@@ -95,7 +119,7 @@ Series_OPS %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_
 ```
 
 
-##Postseason Pitching Data
+## Postseason Pitching Data
 
 ```{r}
 
@@ -121,6 +145,22 @@ PostSeries_Pitching <- PostSeries_Pitching %>%
   mutate(IP = IPouts / 3,                    # Calculate the number of innings pitched
          WHIP = (H + BB + IBB) / IP)         # Calculate the walks/hits per inning pitched
 
+PostSeries_Pitching_2012_2019 <- PostSeries_Pitching %>% 
+  filter(yearID >= 2012 & yearID <= 2019)
+
          
 
 ```
+
+
+```{r}
+
+# Use the stat_mean function to visualize the mean for ERA, IP, and WHIP form 2012-2019
+
+Series_ERA <- Stat_Mean(PostSeries_Pitching, Playoff_Series, ERA, 2012, 2019)
+Series_IP <- Stat_Mean(PostSeries_Pitching, Playoff_Series, IP, 2012, 2019)
+Series_WHIP <- Stat_Mean(PostSeries_Pitching, Playoff_Series, WHIP, 2012, 2019)
+
+
+```
+
