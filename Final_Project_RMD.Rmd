@@ -1,10 +1,10 @@
+=======
 ---
 title: "Baseball Playoff Series Information"
 author: "Angelica Morales & Gabriel Rodriguez"
 date: "4/14/2022"
 output: html_document
 ---
-
 ## Introduction
 For the average person or baseball enthusiast, this project will break down the BLANK to better understand the relationship between BLANK and BLANK. The goal is to identify trends and characteristics of batting and pitching that affect the outcome of which team wins the series.
 
@@ -50,8 +50,7 @@ PostSeries_Batting <- BattingPost %>%
   rename("Playoff_Series" = round)
 ```
 
-This table already contains a lot of relevant baseball statistics. However it is missing important calculations that are commonly used to determine batting performance.
-Fortunately, the data needed to perform these calculations is already in the table, so all we have to do is add columns that perform these calculations. More specifically, we will want to look at batting average (AVG), on-base percentage (OBP), slugging (SLG), and on-base plus slugging (OPS).
+This table already contains a lot of relevant baseball statistics. However it is missing important calculations that are commonly used to determine batting performance.Fortunately, the data needed to perform these calculations is already in the table, so all we have to do is add columns that perform these calculations. More specifically, we will want to look at batting average (AVG), on-base percentage (OBP), slugging (SLG), and on-base plus slugging (OPS).
 
 ```{r}
 # Add columns that calculate more batting statistics
@@ -202,16 +201,31 @@ Series_WHIP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series
 
 Now that we have the means for these batting/pitching statistics, we can compare them to the means of those statistics for teams that won each round. 
 
+
 ```{r}
 
-# Determine the Winning and Losing Teams for each playoff series during 2012-2019
-SeriesPost_2012_2019 <- SeriesPost %>% filter(yearID >= 2012 & yearID <= 2019)
+# Determine the Winning team for each playoff series during 2012-2019
+SeriesWinners_2012_2019 <- SeriesPost %>%
+  filter(yearID >= 2012 & yearID <= 2019) %>% 
+  rename("Playoff_Series" = round) %>%
+  select(yearID, Playoff_Series, teamIDwinner)
+
 
 # Filter our 'PostSeries_Batting' data for years 2012-2019
-Bat_2012_2019 <- PostSeries_Batting %>% filter(yearID >= 2012 & yearID <=2019)
+Bat_2012_2019 <- PostSeries_Batting %>% 
+  filter(yearID >= 2012 & yearID <=2019) %>%
+  select(yearID, Playoff_Series, teamID, lgID, AVG, OBP, SLG, OPS) %>%
+  group_by(yearID, Playoff_Series, teamID) %>%
+  summarise("AVG" = mean(AVG),
+            "OBP" = mean(OBP),
+            "SLG" = mean(SLG),
+            "OPS" = mean(OPS))
 
-left_join(Bat_2012_2019, SeriesPost_2012_2019, by = c("teamID" = "teamIDwinner"))
 
+SeriesWin_Stats <- inner_join(SeriesWinners_2012_2019, Bat_2012_2019, by = c("yearID", "Playoff_Series", "teamIDwinner" = "teamID"))
+
+SeriesWin_Stats
 
 ```
+
 
