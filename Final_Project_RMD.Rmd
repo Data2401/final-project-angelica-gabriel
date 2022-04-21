@@ -1,4 +1,3 @@
-=======
 ---
 title: "Baseball Playoff Series Information"
 author: "Angelica Morales & Gabriel Rodriguez"
