@@ -104,28 +104,31 @@ We can see that as the playoff series progresses from the wild cards to the divi
  
 ```{r}
 # Plot the results
-Series_AVG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_point(color = "blue") + ylim(.1, .4) +
+AVG_Plot <- Series_AVG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_point(color = "blue") + ylim(.1, .4) +
   ggtitle("Batting Average Mean for Individual Playoff Series (2012-2019)") +
   xlab("Playoff Series") +
   ylab("Batting Average")
 
 
-Series_OBP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_point(color = "blue") + ylim(.1, .4) +
+OBP_Plot <- Series_OBP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_point(color = "blue") + ylim(.1, .4) +
   ggtitle("On-Base Percentage Mean for Individual Playoff Series (2012-2019)") +
   xlab("Playoff Series") +
   ylab("On-base Percentage")
 
 
-Series_SLG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_point(color = "blue") + ylim(.1, .4) +
+SLG_Plot<- Series_SLG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_point(color = "blue") + ylim(.1, .4) +
   ggtitle("Slugging Percentage Mean for Individual Playoff Series (2012-2019)") +
   xlab("Playoff Series") +
   ylab("Slugging Percentage")
 
 
-Series_OPS %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_point(color = "blue") + ylim(.1, .7) +
+OPS_Plot <- Series_OPS %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_point(color = "blue") + ylim(.1, .7) +
   ggtitle("On-base Plus Slugging Mean for Individual Playoff Series (2012-2019)") +
   xlab("Playoff Series") +
   ylab("On-base Plus Slugging")
+
+grid.arrange(AVG_Plot, OBP_Plot, SLG_Plot, OPS_Plot)
+
 ```
 
 
