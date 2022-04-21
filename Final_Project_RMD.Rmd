@@ -5,28 +5,30 @@ date: "4/14/2022"
 output: html_document
 ---
 
-# Introduction
+## Introduction
+For the average person or baseball enthusiast, this project will break down the BLANK to better understand the relationship between BLANK and BLANK. The goal is to identify trends and characteristics of batting and pitching that affect the outcome of which team wins the series.
+
+To explore this relationship, we will be using data about batting and pitching from the Lahman database, other resource, and other resource. Our approach is to make an analysis comparing different post season variables to study if there's a correlation between them. We will then take a closer look at which teams won and how they compare. The aim of this analysis is to uncover any new statistics and interpret it to the overall outcome of the winning teams.
 
 
 
-
+## Data Preparation
 ```{r}
-
 # Libraries we will be using for this exploration
-
-library(tibble)
-library(tidyverse)
-library(ggplot2)
-library(Lahman)
-
+library(tibble) #to create tibbles
+library(tidyverse) # multiple tidy up data packages
+library(ggplot2) # for data visualization
+library(Lahman) #baseball database
 ```
-
+The Lahman Baseball Database was obtained from R Studio. It was collected by Sean Lahman who compiled the data. It began as an effort to collect baseball information in one place for personal use. As a freelance writer and baseball enthusiast, Sean Lahman found that having this sort of information at his fingertips was an invaluable resource.
 
 ## Postseason Batting Data
-
-Before we can use the 'BattingPost' data table we need clean it up a bit. First we want to remove any missing data. There is no 
-data available for the 'CS', 'HBP', 'SH', 'SF', and 'GIDP' columns for years 1884-1892, so we will remove data for these years. 
-We will also rename the 'round' column to 'Playoff_Series' to make it more understandable.
+Before we can use the 'BattingPost' data table we need clean it up a bit. First we want to remove any missing data. There is no data available for the 'CS', 'HBP', 'SH', 'SF', and 'GIDP' columns for years 1884-1892, so we will remove data for these years. We will also rename the 'round' column to 'Playoff_Series' to make it more understandable.
+```{r}
+PostSeries_Batting <- BattingPost %>% 
+  na.exclude() %>% 
+  rename("Playoff_Series" = round)
+```
 
 Second, we will add more relevant baseball calculations that will help us better analyze batting performance.
 
@@ -34,27 +36,22 @@ Finally we will take a look at the means of those statistic for all teams, for e
 
 
 ```{r}
-
-# The 'BattingPost' data frame contains batting information for each MLB postseason game for years
-# 1884-2020.
+# The 'BattingPost' data frame contains batting information for each MLB postseason game for years 1884-2020.
 view(BattingPost)
 BattingPost <-BattingPost
+```
 
+
+```{r}
 # Let's take a look at summarized statistics for each different playoff series
-
 # Remove all observations for which data is missing. Rename 'round' column to 'Playoff Series'
 PostSeries_Batting <- BattingPost %>% 
   na.exclude() %>% 
   rename("Playoff_Series" = round)
-
 ```
 
-This table already contains a lot of relevant baseball statistics. However it is missing important calculations that are commonly
-used to determine batting performance.
-
-Fortunately, the data needed to perform these calculations is already in the table, so all we have to do is add columns that perform
-these calculations. More specifically, we will want to look at batting average (AVG), on-base percentage (OBP), slugging (SLG), and
-on-base plus slugging (OPS).
+This table already contains a lot of relevant baseball statistics. However it is missing important calculations that are commonly used to determine batting performance.
+Fortunately, the data needed to perform these calculations is already in the table, so all we have to do is add columns that perform these calculations. More specifically, we will want to look at batting average (AVG), on-base percentage (OBP), slugging (SLG), and on-base plus slugging (OPS).
 
 ```{r}
 # Add columns that calculate more batting statistics
@@ -113,25 +110,25 @@ Series_OPS <- Stat_Mean(PostSeries_Batting, Playoff_Series, OPS, 2012, 2019)
 ```{r}
 # Plot the results
 Series_AVG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
-  ggtitle("Batting Average Mean for Individual Playoff Series (2012-2019") +
+  ggtitle("Batting Average Mean for Individual Playoff Series (2012-2019)") +
   xlab("Playoff Series") +
   ylab("Batting Average")
 
 
 Series_OBP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
-  ggtitle("On-Base Percentage Mean for Individual Playoff Series (2012-2019") +
+  ggtitle("On-Base Percentage Mean for Individual Playoff Series (2012-2019)") +
   xlab("Playoff Series") +
   ylab("On-base Percentage")
 
 
 Series_SLG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
-  ggtitle("Slugging Percentage Mean for Individual Playoff Series (2012-2019") +
+  ggtitle("Slugging Percentage Mean for Individual Playoff Series (2012-2019)") +
   xlab("Playoff Series") +
   ylab("Slugging Percentage")
 
 
 Series_OPS %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
-  ggtitle("On-base Plus Slugging Mean for Individual Playoff Series (2012-2019") +
+  ggtitle("On-base Plus Slugging Mean for Individual Playoff Series (2012-2019)") +
   xlab("Playoff Series") +
   ylab("On-base Plus Slugging")
 ```
@@ -203,9 +200,7 @@ Series_WHIP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series
 
 ```
 
-Now that we have the means for these batting/pitching statistics, we can compare them to the means of those statistics for 
-teams that won each round. 
-
+Now that we have the means for these batting/pitching statistics, we can compare them to the means of those statistics for teams that won each round. 
 
 ```{r}
 
