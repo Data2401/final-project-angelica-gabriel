@@ -232,3 +232,12 @@ SeriesWin_Stats <- inner_join(SeriesWinners_2012_2019, Bat_2012_2019, by = c("ye
 
 ```
 
+
+
+```{r}
+
+SeriesWin_Stats %>% ggplot(aes(x = AVG, fill = Playoff_Series)) + geom_density(alpha = .3) + facet_wrap(~Playoff_Series)
+
+
+```
+
