@@ -40,10 +40,9 @@ view(BattingPost)
 BattingPost <-BattingPost
 ```
 
-
+Let's take a look at summarized statistics for each different playoff series
+Remove all observations for which data is missing. Rename 'round' column to 'Playoff Series'
 ```{r}
-# Let's take a look at summarized statistics for each different playoff series
-# Remove all observations for which data is missing. Rename 'round' column to 'Playoff Series'
 PostSeries_Batting <- BattingPost %>% 
   na.exclude() %>% 
   rename("Playoff_Series" = round)
@@ -77,14 +76,11 @@ PostSeries_Batting <- PostSeries_Batting %>%
 **Overall means for batting average (AVG), on-base percentage (OBP), slugging (SLG),** 
 **and on-base plus slugging (OPS), for each individual postseason series during the** 
 **expanded wild card era (2012-2019)**
+
+Let's focus on the expanded wild card era years 2012-2019 and compare the batting average among each playoff series.
+
+This function takes in our 'PostSeries_Batting' df, groups_by 'Playoff_Series', then summarizes the mean of the chosen stat for each different playoff series, within the chosen start_year and end_year
 ```{r}
-# Let's focus on the expanded wild card era years 2012-2019
-# Compare the batting average among each playoff series
-
-# This function takes in our 'PostSeries_Batting' df, groups_by 'Playoff_Series', then
-# summarizes the mean of the chosen stat for each different playoff series, within the 
-# chosen start_year and end_year
-
 Stat_Mean <- function(dataset, Playoff_Series, stat_name, start_year, end_year) {
   Playoff_Series <- enquo(Playoff_Series)
   stat_name <- enquo(stat_name)
@@ -106,6 +102,8 @@ Series_OPS <- Stat_Mean(PostSeries_Batting, Playoff_Series, OPS, 2012, 2019)
 ```
 
 ```{r}
+
+
 # Plot the results
 Series_AVG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
   ggtitle("Batting Average Mean for Individual Playoff Series (2012-2019)") +
