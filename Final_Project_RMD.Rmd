@@ -18,6 +18,7 @@ library(tibble) #to create tibbles
 library(tidyverse) # multiple tidy up data packages
 library(ggplot2) # for data visualization
 library(Lahman) #baseball database
+library(grid)
 ```
 The Lahman Baseball Database was obtained from R Studio. It was collected by Sean Lahman who compiled the data. It began as an effort to collect baseball information in one place for personal use. As a freelance writer and baseball enthusiast, Sean Lahman found that having this sort of information at his fingertips was an invaluable resource.
 
@@ -73,11 +74,7 @@ PostSeries_Batting <- PostSeries_Batting %>%
 ```
 
 
-**Overall means for batting average (AVG), on-base percentage (OBP), slugging (SLG),** 
-**and on-base plus slugging (OPS), for each individual postseason series during the** 
-**expanded wild card era (2012-2019)**
-
-Let's focus on the expanded wild card era years 2012-2019 and compare the batting average among each playoff series.
+Overall means for batting average (AVG), on-base percentage (OBP), slugging (SLG), and on-base plus slugging (OPS), for each individual postseason series during the expanded wild card era (2012-2019). Let's focus on the expanded wild card era and compare the batting average among each playoff series.
 
 This function takes in our 'PostSeries_Batting' df, groups_by 'Playoff_Series', then summarizes the mean of the chosen stat for each different playoff series, within the chosen start_year and end_year
 ```{r}
@@ -101,29 +98,31 @@ Series_OPS <- Stat_Mean(PostSeries_Batting, Playoff_Series, OPS, 2012, 2019)
  
 ```
 
+
+
+We can see that as the playoff series progresses from the wild cards to the division series, championship series, and the world series, there is a drop in all of these statistics. For all four of theses statistics we can see that the wild card series have the highest means. This would be due to the fact that the wild card series is a one game elimination.
+ 
 ```{r}
-
-
 # Plot the results
-Series_AVG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
+Series_AVG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_point(color = "blue") + ylim(.1, .4) +
   ggtitle("Batting Average Mean for Individual Playoff Series (2012-2019)") +
   xlab("Playoff Series") +
   ylab("Batting Average")
 
 
-Series_OBP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
+Series_OBP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_point(color = "blue") + ylim(.1, .4) +
   ggtitle("On-Base Percentage Mean for Individual Playoff Series (2012-2019)") +
   xlab("Playoff Series") +
   ylab("On-base Percentage")
 
 
-Series_SLG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
+Series_SLG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_point(color = "blue") + ylim(.1, .4) +
   ggtitle("Slugging Percentage Mean for Individual Playoff Series (2012-2019)") +
   xlab("Playoff Series") +
   ylab("Slugging Percentage")
 
 
-Series_OPS %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
+Series_OPS %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_point(color = "blue") + ylim(.1, .7) +
   ggtitle("On-base Plus Slugging Mean for Individual Playoff Series (2012-2019)") +
   xlab("Playoff Series") +
   ylab("On-base Plus Slugging")
@@ -133,7 +132,6 @@ Series_OPS %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_
 ## Postseason Pitching Data
 
 ```{r}
-
 # The 'PitchingPost' data frame contains pitching information for each MLB postseason game for years
 # 1884-2020.
 view(PitchingPost)
@@ -195,12 +193,9 @@ Series_WHIP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series
 
 
 ```
-
 Now that we have the means for these batting/pitching statistics, we can compare them to the means of those statistics for teams that won each round. 
 
-
 ```{r}
-
 # Determine the Winning team for each playoff series during 2012-2019
 SeriesWinners_2012_2019 <- SeriesPost %>%
   filter(yearID >= 2012 & yearID <= 2019) %>% 
