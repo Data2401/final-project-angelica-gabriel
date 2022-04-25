@@ -171,6 +171,7 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
             "mean_AB_HR" = mean(AB_HR)) %>%
   ggplot() +
   geom_col(aes(x = yearID, y = Total_HR, fill = Won.Lost), position = "dodge") +
+  geom_smooth(aes(x = yearID, y = Total_HR)) +
   labs(title = "Total Home Runs Hit in WS",
        subtitle = "(For WS Where All 7 Games Were Played)") +
   xlab("Year Played") +
@@ -221,7 +222,7 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
   ggplot() +
   geom_point(aes(x = yearID, y = mean_AB_HR, color = Won.Lost), position = "dodge") +
   geom_smooth(aes(x= yearID, y = mean_AB_HR), method = lm) +
-  labs(title = "Team Batting Average in WS",
+  labs(title = "At-bat per Home Run Ratio in WS",
        subtitle = "(For WS Where All 7 Games Were Played)") +
   xlab("Year Played") +
   ylab("At-Bat to Homerun Ratio") +
@@ -232,6 +233,25 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
 
 At-bat to home run ratio is increasing at a similar rate for both losing and winning teams. This means that we are 
 more likely to see a homerun in fewer at-bats today, then we were in the past. 
+
+
+**What is the relationship between batting average and home runs hit?**
+
+```{r}
+WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+  summarize("Total_HR" = sum(HR),
+            'mean_Bat_Avg' = mean(Bat_Avg),
+            "mean_AB_HR" = mean(AB_HR)) %>%
+  ggplot(aes(x = Total_HR, y = mean_Bat_Avg, fill = Won.Lost)) +
+  geom_boxplot(alpha = .3) +
+  facet_wrap(~ Won.Lost) +
+  labs(title = "Batting Avg vs. Total HR Hit") +
+  xlab("Total HR Hit") +
+  ylab("Team Batting Average")
+
+```
+
+
 
 
 **What is the  relationship between batting average and at-bats per homerun ratio.**
@@ -245,13 +265,18 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
   ggplot(aes(x = mean_Bat_Avg, y = mean_AB_HR, color = Won.Lost)) +
   geom_point(alpha = .7) +
   geom_smooth() +
-  facet_wrap(~ Won.Lost) 
+  facet_wrap(~ Won.Lost) +
+  labs(title = "Batting Avg vs. AB per HR Ratio") +
+  xlab("Team Batting Average") +
+  ylab("At-bat per Home Run Ratio")
 
 ```
 
 There is no discernible trend between mean batting average and mean at-bat per home run ratio between winning and 
 losing teams. However, with the use of a line, we can see that winning teams have a 'flatter' line. This flat line 
 tells us that winning team's at-bat per home run ratio is more evenly distributed among their batting average.
+
+
 
 **With what frequency are winning teams hitting home runs**
 
@@ -263,10 +288,41 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
             'mean_Bat_Avg' = mean(Bat_Avg),
             "mean_AB_HR" = mean(AB_HR)) %>%
   ggplot(aes(x = Total_HR, fill = Won.Lost)) +
-  geom_density(alpha = .7) +
-  facet_wrap(~ Won.Lost) 
+  geom_density(alpha = .3) +
+  facet_wrap(~ Won.Lost) +
+  labs(title = "Total Home Runs Hit") +
+  xlab("Number of Home Runs")
 
 ```
 
 **What is this graph telling us?**
 The frequency in total number of home runs hit by losing and winning teams hit home runs is very identical.
+
+
+
+```{r}
+
+WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+  summarize("Total_HR" = sum(HR),
+            'mean_Bat_Avg' = mean(Bat_Avg),
+            "mean_AB_HR" = mean(AB_HR)) %>%
+  ggplot(aes(x = mean_Bat_Avg, fill = Won.Lost)) +
+  geom_density(alpha = .3) +
+  #facet_wrap(~ Won.Lost) +
+  labs(title = "Team Batting Average") +
+  xlab("Team Batting Average")
+
+```
+
+The winning teams hit for a higher batting average more frequently than the losing teams.
+
+## Results and Conclusion
+
+There have been a total of 39 World Series' from 1922-2020 in which a seventh game was needed to crown
+a champion. 
+
+### Trends
+We can see different trends for total home runs hit, team batting average,  and at-bat per home run ratios
+during this time. 
+
+**Total Home Runs Hit** - With the exception of the the dip in home runs hit 
