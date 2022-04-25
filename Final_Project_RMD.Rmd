@@ -10,9 +10,6 @@ Since it's inception in 1903, being crowned the World Series champion has been t
 Baseball. Since then, professional baseball has gone through a multitude of different changes that have evolved it 
 into the very technologically and analytically driven sport that exists today. 
 
-<<<<<<< HEAD
-In which series were there more homeruns? In which year was there the most homeruns in the series from question from before.
-=======
 All those things have changed, but one of the few things that remains the same, is the World Series; a best of seven game
 series played between the two different league champions to determine who will be that season's champion. 
 
@@ -21,7 +18,6 @@ series, as well as look at the relationship between batting average and home run
 Any trends will help us predict what kind of batting average and home run number we can expect in future World Series', and
 any relationship between batting average and total home runs hits, will help us determine which of those statistics are more
 important to winning the World Series.
->>>>>>> a6077b1db5abb8037c6e60240c367e88becf3df3
 
 For the purposes of this project we will be looking at World Series' played after 1922, as this is the year that the series
 became a best of seven games series, and we will also only look at batting data for World Series' in which the full seven
@@ -39,16 +35,6 @@ Is team batting average, or total home runs hit a better indicator of which team
 ```{r}
 
 # Libraries we will be using for this exploration
-<<<<<<< HEAD
-library(tibble) #to create tibbles
-library(tidyverse) # multiple tidy up data packages
-library(ggplot2) # for data visualization
-library(Lahman) #baseball database
-library(gridExtra)
-```
-The Lahman Baseball Database was obtained from R Studio. It was collected by Sean Lahman who compiled the data. It began as an effort to collect baseball information in one place for personal use. As a freelance writer and baseball enthusiast, Sean Lahman found that having this sort of information at his fingertips was an invaluable resource.
-=======
->>>>>>> a6077b1db5abb8037c6e60240c367e88becf3df3
 
 library(tidyverse)
 library(ggplot2)
@@ -172,15 +158,10 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
 
 
 ```
-<<<<<<< HEAD
-## Postseason Pitching Data
-=======
 
 ### Trends in Batting Average and Total Home Runs Hit
 
 **What trend if any exists, in total home runs being hit during the World Series?**
->>>>>>> a6077b1db5abb8037c6e60240c367e88becf3df3
-
 
 ```{r}
 
@@ -253,15 +234,8 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
 At-bat to home run ratio is increasing at a similar rate for both losing and winning teams. This means that we are 
 more likely to see a homerun in fewer at-bats today, then we were in the past. 
 
-<<<<<<< HEAD
-# Use the stat_mean function to visualize the mean for ERA, IP, and WHIP from 2012-2019
-Series_ERA <- Stat_Mean(PostSeries_Pitching, Playoff_Series, ERA, 2012, 2019)
-Series_IP <- Stat_Mean(PostSeries_Pitching, Playoff_Series, IP, 2012, 2019)
-Series_WHIP <- Stat_Mean(PostSeries_Pitching, Playoff_Series, WHIP, 2012, 2019)
-=======
 
 **What is the relationship between batting average and home runs hit?**
->>>>>>> a6077b1db5abb8037c6e60240c367e88becf3df3
 
 ```{r}
 WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
