@@ -1,19 +1,45 @@
 ---
-title: "Baseball Playoff Series Information"
+title: "Batting Average or Home Runs to Win the World Series?"
 author: "Angelica Morales & Gabriel Rodriguez"
-date: "4/14/2022"
+date: "4/24/2022"
 output: html_document
 ---
-## Introduction
-For the average person or baseball enthusiast, this project will break down the BLANK to better understand the relationship between BLANK and BLANK. The goal is to identify trends and characteristics of batting and pitching that affect the outcome of which team wins the series.
+# Introduction
 
-To explore this relationship, we will be using data about batting and pitching from the Lahman database, other resource, and other resource. Our approach is to make an analysis comparing different post season variables to study if there's a correlation between them. We will then take a closer look at which teams won and how they compare. The aim of this analysis is to uncover any new statistics and interpret it to the overall outcome of the winning teams.
+Since it's inception in 1903, being crowned the World Series champion has been the goal of any team in Major League
+Baseball. Since then, professional baseball has gone through a multitude of different changes that have evolved it 
+into the very technologically and analytically driven sport that exists today. 
 
+<<<<<<< HEAD
 In which series were there more homeruns? In which year was there the most homeruns in the series from question from before.
+=======
+All those things have changed, but one of the few things that remains the same, is the World Series; a best of seven game
+series played between the two different league champions to determine who will be that season's champion. 
 
-## Data Preparation
+What this project hopes to accomplish is to observe the trends (if any), in batting average and home runs during the world
+series, as well as look at the relationship between batting average and home runs between the winning and losing teams. 
+Any trends will help us predict what kind of batting average and home run number we can expect in future World Series', and
+any relationship between batting average and total home runs hits, will help us determine which of those statistics are more
+important to winning the World Series.
+>>>>>>> a6077b1db5abb8037c6e60240c367e88becf3df3
+
+For the purposes of this project we will be looking at World Series' played after 1922, as this is the year that the series
+became a best of seven games series, and we will also only look at batting data for World Series' in which the full seven
+games were played so as to limit how skewed our data will be. 
+
+
+## The big question? 
+
+What trends exist in batting average, and total home runs hit, in the World Series?
+Is team batting average, or total home runs hit a better indicator of which team will win the World Series. 
+
+
+
+## Packages Used
 ```{r}
+
 # Libraries we will be using for this exploration
+<<<<<<< HEAD
 library(tibble) #to create tibbles
 library(tidyverse) # multiple tidy up data packages
 library(ggplot2) # for data visualization
@@ -21,210 +47,308 @@ library(Lahman) #baseball database
 library(gridExtra)
 ```
 The Lahman Baseball Database was obtained from R Studio. It was collected by Sean Lahman who compiled the data. It began as an effort to collect baseball information in one place for personal use. As a freelance writer and baseball enthusiast, Sean Lahman found that having this sort of information at his fingertips was an invaluable resource.
+=======
+>>>>>>> a6077b1db5abb8037c6e60240c367e88becf3df3
 
-## Postseason Batting Data
-Before we can use the 'BattingPost' data table we need clean it up a bit. First we want to remove any missing data. There is no data available for the 'CS', 'HBP', 'SH', 'SF', and 'GIDP' columns for years 1884-1892, so we will remove data for these years. We will also rename the 'round' column to 'Playoff_Series' to make it more understandable.
-```{r}
-PostSeries_Batting <- BattingPost %>% 
-  na.exclude() %>% 
-  rename("Playoff_Series" = round)
+library(tidyverse)
+library(ggplot2)
+library(Lahman)
+
 ```
 
-Second, we will add more relevant baseball calculations that will help us better analyze batting performance.
+## Data Used
 
-Finally we will take a look at the means of those statistic for all teams, for each individual playoff series from 2012-2019. 
+The data used comes from the 'Lahman' baseball database. The Lahman Database was created by Sean Lahman; 
+an investigative journalist for the USA Today Network, sports columnist for the New York Sun, and data
+projects manager for the Society of American Baseball Research. Lahman has also served as editor 
+and contributor in several sports reference books.
+   
+For the purposes of this project we will be utilizing the 'BattingPost' table which includes individual 
+player batting statistics for each different MLB postseason round from 1903 through 2020. 
 
+The 'BattingPost' table contains a total of  15,460 unique observations. Each observation contains data
+that pertains to 22 different variables
 
 ```{r}
-# The 'BattingPost' data frame contains batting information for each MLB postseason game for years 1884-2020.
-view(BattingPost)
-BattingPost <-BattingPost
+as_tibble(view(BattingPost))
+
 ```
 
-Let's take a look at summarized statistics for each different playoff series
-Remove all observations for which data is missing. Rename 'round' column to 'Playoff Series'
-```{r}
-PostSeries_Batting <- BattingPost %>% 
-  na.exclude() %>% 
-  rename("Playoff_Series" = round)
-```
-
-This table already contains a lot of relevant baseball statistics. However it is missing important calculations that are commonly used to determine batting performance.Fortunately, the data needed to perform these calculations is already in the table, so all we have to do is add columns that perform these calculations. More specifically, we will want to look at batting average (AVG), on-base percentage (OBP), slugging (SLG), and on-base plus slugging (OPS).
+The 'SeriesPost' table contains a total of 358 unique observations. Each observation contains data that 
+pertains to 9 different variables. This table tells us the winning and losing teams for each postseaon
+round from 1884-2020, as well has what leagues they belonged to, and how many games they won/lost. 
 
 ```{r}
-# Add columns that calculate more batting statistics
-PostSeries_Batting <- PostSeries_Batting %>% 
-  filter(AB > 0) %>%                                              # We only want batting info for players who had at least one AB
-  mutate(X1B = (H - (X2B + X3B + HR)),                            # Add a column for singles hit
-         TB = (1*X1B) + (2*X2B) + (3*X3B) + (4*HR),               # Add a column for totatl bases
-         AVG = H/AB,                                              # Add a batting average column
-         OBP = (H + HBP + BB + IBB) / (AB + BB + IBB + HBP + SF), # Add an on-base percentage column
-         SLG = TB / AB,                                           # Add a slugging percentage column
-         OPS = OBP + SLG)                                         # Add an on-base plus slugging column
 
-         
-         
-# Remove base running statistics. We won't need those for batting statistics purposes
-PostSeries_Batting <- PostSeries_Batting %>% select(-SB, -CS)
-
-# Rearrange columns
-PostSeries_Batting <- PostSeries_Batting %>%
-  relocate(TB, AVG, OBP, SLG, OPS, .after = BB)
+as_tibble(view(SeriesPost))
 
 ```
 
 
-Overall means for batting average (AVG), on-base percentage (OBP), slugging (SLG), and on-base plus slugging (OPS), for each individual postseason series during the expanded wild card era (2012-2019). Let's focus on the expanded wild card era and compare the batting average among each playoff series.
+## Data Cleaning/Tidying
 
-This function takes in our 'PostSeries_Batting' df, groups_by 'Playoff_Series', then summarizes the mean of the chosen stat for each different playoff series, within the chosen start_year and end_year
-```{r}
-Stat_Mean <- function(dataset, Playoff_Series, stat_name, start_year, end_year) {
-  Playoff_Series <- enquo(Playoff_Series)
-  stat_name <- enquo(stat_name)
-  
-  dataset %>%
-  filter(yearID >= start_year & yearID <= end_year) %>%
-  group_by(!!Playoff_Series) %>%
-  summarize(series_mean = mean(!!stat_name)) %>%
-  arrange(-series_mean)
-}
-  
-# Use the 'Stat_Mean' function to calculate the mean AVG, OBP, SLG, and OPS
-# for each playoff series for years 2012-2019
-Series_AVG <- Stat_Mean(PostSeries_Batting, Playoff_Series, AVG, 2012, 2019)  
-Series_OBP <- Stat_Mean(PostSeries_Batting, Playoff_Series, OBP, 2012, 2019)  
-Series_SLG <- Stat_Mean(PostSeries_Batting, Playoff_Series, SLG, 2012, 2019)
-Series_OPS <- Stat_Mean(PostSeries_Batting, Playoff_Series, OPS, 2012, 2019)
- 
+
+```{r, echo=FALSE}
+
+
+# We only want to look at World Series 'WS' batting info from 1922-2020. The WS was first played in 1903 but
+# didn't become a best of seven games series until 1922. Let's also remove the 'playerID' column as
+# we will not need to know any individual player's name. 
+
+WS_Batting <- BattingPost %>%
+  filter(round == "WS", 
+         yearID >= 1922 & yearID <= 2020) %>%
+  select(yearID, round, teamID, G, AB, H, HR)
+
+
 ```
 
 
 
-We can see that as the playoff series progresses from the wild cards to the division series, championship series, and the world series, there is a drop in all of these statistics. For all four of theses statistics we can see that the wild card series have the highest means. This would be due to the fact that the wild card series is a one game elimination.
- 
-```{r}
-# Plot the results
-AVG_Plot <- Series_AVG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_point(color = "blue") + ylim(.1, .4) +
-  ggtitle("Batting Average Mean for Individual Playoff Series (2012-2019)") +
-  xlab("Playoff Series") +
-  ylab("Batting Average")
+```{r, echo=FALSE}
+# Add batting average statistic
+# We will also add 
+ WS_Batting <- WS_Batting %>% 
+  filter(AB > 0) %>%
+   mutate("Bat_Avg" = H / AB,
+          "AB_HR" = ifelse(HR > 0, AB / HR, 0))
+```
 
+```{r, echo=FALSE}
+# Filter the 'SeriePost' for WS from 1922-2020. Add a column to determine the total number of games played
+# in each World Series, then remove unecessary columns.
 
-OBP_Plot <- Series_OBP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_point(color = "blue") + ylim(.1, .4) +
-  ggtitle("On-Base Percentage Mean for Individual Playoff Series (2012-2019)") +
-  xlab("Playoff Series") +
-  ylab("On-base Percentage")
-
-
-SLG_Plot<- Series_SLG %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_point(color = "blue") + ylim(.1, .4) +
-  ggtitle("Slugging Percentage Mean for Individual Playoff Series (2012-2019)") +
-  xlab("Playoff Series") +
-  ylab("Slugging Percentage")
-
-
-OPS_Plot <- Series_OPS %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_point(color = "blue") + ylim(.1, .7) +
-  ggtitle("On-base Plus Slugging Mean for Individual Playoff Series (2012-2019)") +
-  xlab("Playoff Series") +
-  ylab("On-base Plus Slugging")
-
-grid.arrange(AVG_Plot, OBP_Plot, SLG_Plot, OPS_Plot)
+WS_results <- SeriesPost %>%
+  mutate("games_played" = wins + losses) %>%
+  filter(round == "WS", 
+         yearID >= 1922 & yearID <= 2020,
+         games_played == 7) %>%
+  select(yearID, round, teamIDwinner, teamIDloser, games_played)
 
 ```
+
+```{r, echo=FALSE}
+# We will use the 'inner_join' function to join our 'WS_Batting' table with the 'Series_Winner' table on the 'yearID',
+# and 'teamID' = 'teamIDwinner' columns. This will return a table that contains only the batting information for 
+# the World Series winners.
+
+WS_Batting <- left_join(WS_Batting, WS_results, by = c("yearID", "round")) %>% 
+  filter(games_played == 7) %>%
+  select(-games_played)
+```
+
+```{r, echo=FALSE}
+# Add a won/lost column
+
+WS_Batting <- WS_Batting %>% 
+  mutate(Won.Lost = if_else(as.character(.$teamID) == as.character(.$teamIDwinner), 'Won', 'Lost'))
+
+```
+
+
+## Data Exploration
+
+
+Let's get some historical context first, and see how many World Series' have been played out to the maximum
+7 games.
+
+There have been 39 World Series' between 1922-2020 in which all seven games have been played. 
+```{r}
+
+WS_Batting %>% group_by(yearID) %>% summarize(n = n()) %>% n_distinct()
+
+```
+
+What were the total number of Home Runs hit by each team, mean batting average, and mean AB per HR ratio?
+
+```{r}
+
+# Total number of home runs, mean Batting Average, mean At-Bats per Home Run Ratio
+
+WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+  summarize("Total_HR" = sum(HR),
+            'mean_Bat_Avg' = mean(Bat_Avg),
+            "mean_AB_HR" = mean(AB_HR))
+
+
+```
+<<<<<<< HEAD
 ## Postseason Pitching Data
+=======
+
+### Trends in Batting Average and Total Home Runs Hit
+
+**What trend if any exists, in total home runs being hit during the World Series?**
+>>>>>>> a6077b1db5abb8037c6e60240c367e88becf3df3
 
 
 ```{r}
-# The 'PitchingPost' data frame contains pitching information for each MLB postseason game for years
-# 1884-2020.
-view(PitchingPost)
-PitchingPost <-PitchingPost
 
-# Let's take a look at summarized statistics for each different playoff series
+WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+  summarize("Total_HR" = sum(HR),
+            'mean_Bat_Avg' = mean(Bat_Avg),
+            "mean_AB_HR" = mean(AB_HR)) %>%
+  ggplot() +
+  geom_col(aes(x = yearID, y = Total_HR, fill = Won.Lost), position = "dodge") +
+  geom_smooth(aes(x = yearID, y = Total_HR)) +
+  labs(title = "Total Home Runs Hit in WS",
+       subtitle = "(For WS Where All 7 Games Were Played)") +
+  xlab("Year Played") +
+  ylab("Total Home Runs Hit")
 
-# Remove all observations for which data is missing. Rename 'round' column to 'Playoff Series'
-PostSeries_Pitching <- PitchingPost %>% 
-  na.exclude() %>% 
-  rename("Playoff_Series" = round)
 
+```
+ 
+ 
+ More World Series games went to a decisive game 7 between the 25 year time span of 1950-1975. 
+ 
+ There have not been many World Series played, that require all 7 games, in the last 20 years,
+ but we have seen more total home runs hit by **both** winning and losing teams in those games. 
+ 
+**What trend if any exists, in batting average during the World Series?**
+
+```{r}
+
+WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+  summarize("Total_HR" = sum(HR),
+            'mean_Bat_Avg' = mean(Bat_Avg),
+            "mean_AB_HR" = mean(AB_HR)) %>%
+  ggplot() +
+  geom_point(aes(x = yearID, y = mean_Bat_Avg, color = Won.Lost), position = "dodge") +
+  geom_smooth(aes(x= yearID, y = mean_Bat_Avg), method = lm) +
+  labs(title = "Team Batting Average in WS",
+       subtitle = "(For WS Where All 7 Games Were Played)") +
+  xlab("Year Played") +
+  ylab("Team Batting Average") +
+  facet_wrap(~Won.Lost)
 
 
 ```
 
+Batting average for losing World Series teams is gradually decreasing.
+
+Batting average for winning World Series teams is gradually increasing. 
+
+
+**What trend if any exists, in batting average during the World Series?**
 
 ```{r}
-# Add columns that calculate more pitching statistics
-PostSeries_Pitching <- PostSeries_Pitching %>% 
-  mutate(IP = IPouts / 3,                    # Calculate the number of innings pitched
-         WHIP = (H + BB + IBB) / IP) %>%     # Calculate the walks/hits per inning pitched
-  filter(IP > 0)       
 
+WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+  summarize("Total_HR" = sum(HR),
+            'mean_Bat_Avg' = mean(Bat_Avg),
+            "mean_AB_HR" = mean(AB_HR)) %>%
+  ggplot() +
+  geom_point(aes(x = yearID, y = mean_AB_HR, color = Won.Lost), position = "dodge") +
+  geom_smooth(aes(x= yearID, y = mean_AB_HR), method = lm) +
+  labs(title = "At-bat per Home Run Ratio in WS",
+       subtitle = "(For WS Where All 7 Games Were Played)") +
+  xlab("Year Played") +
+  ylab("At-Bat to Homerun Ratio") +
+  facet_wrap(~Won.Lost)
 
 ```
 
 
-```{r}
+At-bat to home run ratio is increasing at a similar rate for both losing and winning teams. This means that we are 
+more likely to see a homerun in fewer at-bats today, then we were in the past. 
 
+<<<<<<< HEAD
 # Use the stat_mean function to visualize the mean for ERA, IP, and WHIP from 2012-2019
 Series_ERA <- Stat_Mean(PostSeries_Pitching, Playoff_Series, ERA, 2012, 2019)
 Series_IP <- Stat_Mean(PostSeries_Pitching, Playoff_Series, IP, 2012, 2019)
 Series_WHIP <- Stat_Mean(PostSeries_Pitching, Playoff_Series, WHIP, 2012, 2019)
+=======
 
-
-```
-
-```{r}
-# Plot the results
-Series_ERA %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
-  ggtitle("Earned Run Average for Individual Playoff Series (2012-2019") +
-  xlab("Playoff Series") +
-  ylab("Earned Run Average (ERA)")
-
-
-Series_IP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
-  ggtitle("Innings Pitched Mean for Individual Playoff Series (2012-2019") +
-  xlab("Playoff Series") +
-  ylab("Innings Pitched (IP)")
-
-
-Series_WHIP %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean), y = series_mean)) + geom_col() +
-  ggtitle("Walks/Hits Per IP Mean for Individual Playoff Series (2012-2019") +
-  xlab("Playoff Series") +
-  ylab("Walks/Hits Per Inning Pitched (WHIP)")
-
-
-
-```
-Now that we have the means for these batting/pitching statistics, we can compare them to the means of those statistics for teams that won each round. 
+**What is the relationship between batting average and home runs hit?**
+>>>>>>> a6077b1db5abb8037c6e60240c367e88becf3df3
 
 ```{r}
-# Determine the Winning team for each playoff series during 2012-2019
-SeriesWinners_2012_2019 <- SeriesPost %>%
-  filter(yearID >= 2012 & yearID <= 2019) %>% 
-  rename("Playoff_Series" = round) %>%
-  select(yearID, Playoff_Series, teamIDwinner)
-
-
-# Filter our 'PostSeries_Batting' data for years 2012-2019
-Bat_2012_2019 <- PostSeries_Batting %>% 
-  filter(yearID >= 2012 & yearID <=2019) %>%
-  select(yearID, Playoff_Series, teamID, lgID, AVG, OBP, SLG, OPS) %>%
-  group_by(yearID, Playoff_Series, teamID) %>%
-  summarise("AVG" = mean(AVG),
-            "OBP" = mean(OBP),
-            "SLG" = mean(SLG),
-            "OPS" = mean(OPS))
-
-
-SeriesWin_Stats <- inner_join(SeriesWinners_2012_2019, Bat_2012_2019, by = c("yearID", "Playoff_Series", "teamIDwinner" = "teamID"))
-
-SeriesWin_Stats
+WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+  summarize("Total_HR" = sum(HR),
+            'mean_Bat_Avg' = mean(Bat_Avg),
+            "mean_AB_HR" = mean(AB_HR)) %>%
+  ggplot(aes(x = Total_HR, y = mean_Bat_Avg, fill = Won.Lost)) +
+  geom_boxplot(alpha = .3) +
+  facet_wrap(~ Won.Lost) +
+  labs(title = "Batting Avg vs. Total HR Hit") +
+  xlab("Total HR Hit") +
+  ylab("Team Batting Average")
 
 ```
+
+
+
+
+**What is the  relationship between batting average and at-bats per homerun ratio.**
+
+```{r}
+
+WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+  summarize("Total_HR" = sum(HR),
+            'mean_Bat_Avg' = mean(Bat_Avg),
+            "mean_AB_HR" = mean(AB_HR)) %>%
+  ggplot(aes(x = mean_Bat_Avg, y = mean_AB_HR, color = Won.Lost)) +
+  geom_point(alpha = .7) +
+  geom_smooth() +
+  facet_wrap(~ Won.Lost) +
+  labs(title = "Batting Avg vs. AB per HR Ratio") +
+  xlab("Team Batting Average") +
+  ylab("At-bat per Home Run Ratio")
+
+```
+
+There is no discernible trend between mean batting average and mean at-bat per home run ratio between winning and 
+losing teams. However, with the use of a line, we can see that winning teams have a 'flatter' line. This flat line 
+tells us that winning team's at-bat per home run ratio is more evenly distributed among their batting average.
+
+
+
+**With what frequency are winning teams hitting home runs**
 
 
 ```{r}
 
-SeriesWin_Stats %>% ggplot(aes(x = AVG, fill = Playoff_Series)) + geom_density(alpha = .3) + facet_wrap(~Playoff_Series)
-
+WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+  summarize("Total_HR" = sum(HR),
+            'mean_Bat_Avg' = mean(Bat_Avg),
+            "mean_AB_HR" = mean(AB_HR)) %>%
+  ggplot(aes(x = Total_HR, fill = Won.Lost)) +
+  geom_density(alpha = .3) +
+  facet_wrap(~ Won.Lost) +
+  labs(title = "Total Home Runs Hit") +
+  xlab("Number of Home Runs")
 
 ```
+
+**What is this graph telling us?**
+The frequency in total number of home runs hit by losing and winning teams hit home runs is very identical.
+
+
+
+```{r}
+
+WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+  summarize("Total_HR" = sum(HR),
+            'mean_Bat_Avg' = mean(Bat_Avg),
+            "mean_AB_HR" = mean(AB_HR)) %>%
+  ggplot(aes(x = mean_Bat_Avg, fill = Won.Lost)) +
+  geom_density(alpha = .3) +
+  #facet_wrap(~ Won.Lost) +
+  labs(title = "Team Batting Average") +
+  xlab("Team Batting Average")
+
+```
+
+The winning teams hit for a higher batting average more frequently than the losing teams.
+
+## Results and Conclusion
+
+There have been a total of 39 World Series' from 1922-2020 in which a seventh game was needed to crown
+a champion. 
+
+### Trends
+We can see different trends for total home runs hit, team batting average,  and at-bat per home run ratios
+during this time. 
+
+**Total Home Runs Hit** - With the exception of the the dip in home runs hit 
