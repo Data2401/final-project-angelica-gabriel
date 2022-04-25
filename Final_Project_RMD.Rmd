@@ -170,8 +170,8 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
             'mean_Bat_Avg' = mean(Bat_Avg),
             "mean_AB_HR" = mean(AB_HR)) %>%
   ggplot() +
-  geom_col(aes(x = yearID, y = Total_HR, fill = Won.Lost), position = "dodge") +
-  geom_smooth(aes(x = yearID, y = Total_HR)) +
+  geom_point(aes(x = yearID, y = Total_HR, color = Won.Lost), position = "dodge") +
+  geom_smooth(aes(x = yearID, y = Total_HR, color = Won.Lost)) +
   labs(title = "Total Home Runs Hit in WS",
        subtitle = "(For WS Where All 7 Games Were Played)") +
   xlab("Year Played") +
@@ -196,7 +196,7 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
             "mean_AB_HR" = mean(AB_HR)) %>%
   ggplot() +
   geom_point(aes(x = yearID, y = mean_Bat_Avg, color = Won.Lost), position = "dodge") +
-  geom_smooth(aes(x= yearID, y = mean_Bat_Avg), method = lm) +
+  geom_smooth(aes(x= yearID, y = mean_Bat_Avg)) +
   labs(title = "Team Batting Average in WS",
        subtitle = "(For WS Where All 7 Games Were Played)") +
   xlab("Year Played") +
@@ -221,7 +221,7 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
             "mean_AB_HR" = mean(AB_HR)) %>%
   ggplot() +
   geom_point(aes(x = yearID, y = mean_AB_HR, color = Won.Lost), position = "dodge") +
-  geom_smooth(aes(x= yearID, y = mean_AB_HR), method = lm) +
+  geom_smooth(aes(x= yearID, y = mean_AB_HR)) +
   labs(title = "At-bat per Home Run Ratio in WS",
        subtitle = "(For WS Where All 7 Games Were Played)") +
   xlab("Year Played") +
@@ -289,7 +289,7 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
             "mean_AB_HR" = mean(AB_HR)) %>%
   ggplot(aes(x = Total_HR, fill = Won.Lost)) +
   geom_density(alpha = .3) +
-  facet_wrap(~ Won.Lost) +
+  #facet_wrap(~ Won.Lost) +
   labs(title = "Total Home Runs Hit") +
   xlab("Number of Home Runs")
 
