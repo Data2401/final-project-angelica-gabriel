@@ -242,12 +242,11 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
   summarize("Total_HR" = sum(HR),
             'mean_Bat_Avg' = mean(Bat_Avg),
             "mean_AB_HR" = mean(AB_HR)) %>%
-  ggplot(aes(x = Total_HR, y = mean_Bat_Avg, fill = Won.Lost)) +
+  ggplot(aes(x = c(Won.Lost), y = Total_HR, fill = Won.Lost)) +
   geom_boxplot(alpha = .3) +
-  facet_wrap(~ Won.Lost) +
-  labs(title = "Batting Avg vs. Total HR Hit") +
-  xlab("Total HR Hit") +
-  ylab("Team Batting Average")
+  labs(title = "Total HR Hit") +
+  xlab("") +
+  ylab("Total Home Runs Hit")
 
 ```
 
@@ -316,6 +315,25 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
 
 The winning teams hit for a higher batting average more frequently than the losing teams.
 
+
+## Frequency of At-bats per home run ratio
+
+**With what frequency are winning teams hitting home runs**
+
+
+```{r}
+
+WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+  summarize("Total_HR" = sum(HR),
+            'mean_Bat_Avg' = mean(Bat_Avg),
+            "mean_AB_HR" = mean(AB_HR)) %>%
+  ggplot(aes(x = mean_AB_HR, fill = Won.Lost)) +
+  geom_density(alpha = .3) +
+  #facet_wrap(~ Won.Lost) +
+  labs(title = "At-Bats Per Home Run Ratio") +
+  xlab("AB per HR Ratio")
+
+```
 ## Results and Conclusion
 
 There have been a total of 39 World Series' from 1922-2020 in which a seventh game was needed to crown
