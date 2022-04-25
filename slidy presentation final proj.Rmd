@@ -1,0 +1,74 @@
+---
+title: "Batting Average or Home Runs to Win the World Series?"
+author: "Angelica Morales & Gabriel Rodriguez"
+date: "4/24/2022"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Introduction
+Since it's inception in 1903, being crowned the World Series champion has been the goal of any team in Major League Baseball. Since then, professional baseball has gone through a multitude of different changes that have evolved it into the very technologically and analytically driven sport that exists today. 
+
+All those things have changed, but one of the few things that remains the same, is the World Series; a best of seven game series played between the two different league champions to determine who will be that season's champion. 
+
+What this project hopes to accomplish is to observe the trends (if any), in batting average and home runs during the world series, as well as look at the relationship between batting average and home runs between the winning and losing teams. Any trends will help us predict what kind of batting average and home run number we can expect in future World Series', and any relationship between batting average and total home runs hits, will help us determine which of those statistics are more important to winning the World Series.
+
+For the purposes of this project we will be looking at World Series' played after 1922, as this is the year that the series became a best of seven games series, and we will also only look at batting data for World Series' in which the full seven games were played so as to limit how skewed our data will be. 
+
+```{r}
+
+# Libraries we will be using for this exploration
+
+library(tidyverse)
+library(ggplot2)
+library(Lahman)
+
+```
+## The Big Question?
+
+What trends exist in batting average, and total home runs hit, in the World Series?
+Is team batting average, or total home runs hit a better indicator of which team will win the World Series. 
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+## Data Used
+The data used comes from the 'Lahman' baseball database. The Lahman Database was created by Sean Lahman; an investigative journalist for the USA Today Network, sports columnist for the New York Sun, and data projects manager for the Society of American Baseball Research. Lahman has also served as editor and contributor in several sports reference books.
+   
+For the purposes of this project we will be utilizing the 'BattingPost' table which includes individual player batting statistics for each different MLB postseason round from 1903 through 2020.
+
+The 'BattingPost' table contains a total of  15,460 unique observations. Each observation contains data that pertains to 22 different variables
+
+```{r}
+as_tibble(view(BattingPost))
+
+```
+
+The 'SeriesPost' table contains a total of 358 unique observations. Each observation contains data that pertains to 9 different variables. This table tells us the winning and losing teams for each postseaon round from 1884-2020, as well has what leagues they belonged to, and how many games they won/lost. 
+
+```{r}
+
+as_tibble(view(SeriesPost))
+
+```
+
+## Data Cleaning/Tidying
+We only want to look at World Series 'WS' batting info from 1922-2020. The WS was first played in 1903 but didn't become a best of seven games series until 1922. Let's also remove the 'playerID' column as we will not need to know any individual player's name.
+```{r, echo=FALSE, results=TRUE}
+WS_Batting <- BattingPost %>%
+  filter(round == "WS", 
+         yearID >= 1922 & yearID <= 2020) %>%
+  select(yearID, round, teamID, G, AB, H, HR)
+
+```
+
+## Slide with Plot
+
+```{r pressure}
+plot(pressure)
+```
+
