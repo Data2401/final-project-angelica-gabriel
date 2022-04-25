@@ -9,7 +9,7 @@ For the average person or baseball enthusiast, this project will break down the 
 
 To explore this relationship, we will be using data about batting and pitching from the Lahman database, other resource, and other resource. Our approach is to make an analysis comparing different post season variables to study if there's a correlation between them. We will then take a closer look at which teams won and how they compare. The aim of this analysis is to uncover any new statistics and interpret it to the overall outcome of the winning teams.
 
-
+In which series were there more homeruns? In which year was there the most homeruns in the series from question from before.
 
 ## Data Preparation
 ```{r}
@@ -18,7 +18,7 @@ library(tibble) #to create tibbles
 library(tidyverse) # multiple tidy up data packages
 library(ggplot2) # for data visualization
 library(Lahman) #baseball database
-library(grid)
+library(gridExtra)
 ```
 The Lahman Baseball Database was obtained from R Studio. It was collected by Sean Lahman who compiled the data. It began as an effort to collect baseball information in one place for personal use. As a freelance writer and baseball enthusiast, Sean Lahman found that having this sort of information at his fingertips was an invaluable resource.
 
@@ -130,9 +130,8 @@ OPS_Plot <- Series_OPS %>% ggplot(aes(x = reorder(Playoff_Series, -series_mean),
 grid.arrange(AVG_Plot, OBP_Plot, SLG_Plot, OPS_Plot)
 
 ```
-
-
 ## Postseason Pitching Data
+
 
 ```{r}
 # The 'PitchingPost' data frame contains pitching information for each MLB postseason game for years
@@ -165,8 +164,7 @@ PostSeries_Pitching <- PostSeries_Pitching %>%
 
 ```{r}
 
-# Use the stat_mean function to visualize the mean for ERA, IP, and WHIP form 2012-2019
-
+# Use the stat_mean function to visualize the mean for ERA, IP, and WHIP from 2012-2019
 Series_ERA <- Stat_Mean(PostSeries_Pitching, Playoff_Series, ERA, 2012, 2019)
 Series_IP <- Stat_Mean(PostSeries_Pitching, Playoff_Series, IP, 2012, 2019)
 Series_WHIP <- Stat_Mean(PostSeries_Pitching, Playoff_Series, WHIP, 2012, 2019)
