@@ -1,40 +1,91 @@
 ---
-title: "Batting Average or Home Runs to Win the World Series?"
+title: "Batting in the Win the World Series"
 author: "Angelica Morales & Gabriel Rodriguez"
 date: "4/24/2022"
 output: slidy_presentation
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(dbplyr)
+library(Lahman)
 ```
+
+
 
 ## Introduction
-Since it's inception in 1903, being crowned the World Series champion has been the goal of any team in Major League Baseball. Since then, professional baseball has gone through a multitude of different changes that have evolved it into the very technologically and analytically driven sport that exists today. 
 
-All those things have changed, but one of the few things that remains the same, is the World Series; a best of seven game series played between the two different league champions to determine who will be that season's champion. 
+Explain what our project is about:
 
-What this project hopes to accomplish is to observe the trends (if any), in batting average and home runs during the world series, as well as look at the relationship between batting average and home runs between the winning and losing teams. Any trends will help us predict what kind of batting average and home run number we can expect in future World Series', and any relationship between batting average and total home runs hits, will help us determine which of those statistics are more important to winning the World Series.
+We are doing our project on the realtion ship between batting average and home runs in the world series.
 
-For the purposes of this project we will be looking at World Series' played after 1922, as this is the year that the series became a best of seven games series, and we will also only look at batting data for World Series' in which the full seven games were played so as to limit how skewed our data will be. 
+Present our two main questions:
+We will look at how these two traditional statistics have changed, and which one is the biggest determinant 
+for winning the World Series. 
 
-```{r}
 
-# Libraries we will be using for this exploration
 
-library(tidyverse)
-library(ggplot2)
-library(Lahman)
 
-```
-## The Big Question?
+## Historical Context
 
-What trends exist in batting average, and total home runs hit, in the World Series?
-Is team batting average, or total home runs hit a better indicator of which team will win the World Series. 
+**World Series**
 
-- Bullet 1
-- Bullet 2
-- Bullet 3
+* Annual championship series of Major League Baseball (MLB) 
+  + *First played in 1903*
+  + *Total of 117 played (Excepetions: 1904, 1994)*
+  + *American League Champion vs. National League Champion*   
+  + *Winner gets crowned WS champion and wins the Commissioner's Trophy*
+  + *The best team in baseball for that season!*
+  
+<img src="https://2qq12h8mzek4ddcxr8hr8ra7-wpengine.netdna-ssl.com/wp-content/uploads/2018/06/Astros-World-Series-trophy.jpg" width="1000" />
+
+
+## Variables 
+
+* **Home Runs (HR)**  
+
+  + **HR Def.** - *A home run occurs when a batter hits a fair ball and scores on the play without being put out or without the benefit                     of an error.*
+  + **AKA** - *homer, dinger, blast, big fly, many more...*  
+  
+  
+* **At-bats per HR (AB/HR)**  
+
+  + **AB/HR Def.** - *A measure of how frequently a batter hits a home run.*
+  + **Calculation** - *AB (At bats) / HR*
+    + **Lower** AB/HR = **more** frequent HR
+    + **Higher** AB/HR = **less** frequent HR  
+    
+
+* **Batting Average (AVG)**  
+
+  + **AVG Def.** - *the average performance of a batter, expressed as a ratio of a batter's safe hits per official times at bat.*
+  + **Calculation** - *Hits (H) / AB
+    + **Lower** AVG = **less** frequent *H*
+    + **Higher** AVG = **more** frequent *H*
+  
+  **NOTE:** Not all H are HR, but all HR are H
+
+## **Relationship Between Variables**  
+
+* **Home Runs v. Batting Average**  
+  
+    + **Traditional statistics**
+      + *HR* - guarantees you score at least one run, or as many as four 
+      + *AVG* - helps increase more scoring opportunities
+    
+    + **Players who hit:** 
+      + more home runs have lower batting average  
+      + less home runs have higher batting average
+
+**So, is better to hit more homer runs, or hit for a higher batting aveage to win the World Series?**
+
+<img src="https://s.wsj.net/public/resources/images/BN-VU250_3g2fJ_HD_20171025133234.jpg" width="600" />
+  
+
+
+
+
+  
 
 ## Data Used
 The data used comes from the 'Lahman' baseball database. The Lahman Database was created by Sean Lahman; an investigative journalist for the USA Today Network, sports columnist for the New York Sun, and data projects manager for the Society of American Baseball Research. Lahman has also served as editor and contributor in several sports reference books.
@@ -66,9 +117,51 @@ WS_Batting <- BattingPost %>%
 
 ```
 
-## Slide with Plot
+## Trend of home runs hit
 
-```{r pressure}
-plot(pressure)
-```
+include graph, and observations
+
+
+## Trend of AB/HR
+
+include graph, and observations
+
+## Trend of Batting Average
+
+include graph, and observations
+
+
+## Compare home runs hit for winning/losing teams
+
+graph, observations
+
+## Compare AB/HR for winning/losing teams
+
+graph, observations
+
+## Compare batting average for winning/losing teams
+
+graph, observations
+
+## Look at frequency of home runs for winning/losing teams
+
+graph, observations
+
+## Look at frequency of batting average for winning/losing teams
+
+graph, observations
+
+## Results
+
+Summary of trends. What can we expect to see in future World Series'?
+
+Can we determine if hitting more home runs or hitting for a higher batting
+average is more condusive to winning the World Series? Why or why not?
+
+
+## Conclusion
+
+Nice goodbye, and thanks. 
+
+
 

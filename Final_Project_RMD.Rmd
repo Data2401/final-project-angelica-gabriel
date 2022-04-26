@@ -49,11 +49,15 @@ an investigative journalist for the USA Today Network, sports columnist for the 
 projects manager for the Society of American Baseball Research. Lahman has also served as editor 
 and contributor in several sports reference books.
    
-For the purposes of this project we will be utilizing the 'BattingPost' table which includes individual 
-player batting statistics for each different MLB postseason round from 1903 through 2020. 
+**'BattingPost'** - This table contains individual player batting statistics for each different MLB postseason round from
+1903 through 2020. It includes a total of  15,460 unique observations. Each observation contains data that pertains to 
+22 different variables including: *'yearID'*, *'round'*, *'playerID'*, *'teamID'*, league ID (*'lgID'*), games played (*'G'*), and 16 
+different batting statistics. 
 
-The 'BattingPost' table contains a total of  15,460 unique observations. Each observation contains data
-that pertains to 22 different variables
+**'SeriesPost'** - This table contains data for series results for each different MLB postseason round from 1903 through 2020.
+It includes a total of 358 unique observations. Each observations has data for 9 different variables including: *'yearID'*, 
+*'round'*, *'teamIDwinner'*, *'lgIDwinner'*, *'teamIDloser'*, *'lgIDloser'*, *'wins'*, *'losses'*, and *'ties'*. 
+
 
 ```{r}
 as_tibble(view(BattingPost))
@@ -91,7 +95,7 @@ WS_Batting <- BattingPost %>%
 
 
 
-```{r, echo=FALSE}
+```{r}
 # Add batting average statistic
 # We will also add 
  WS_Batting <- WS_Batting %>% 
@@ -100,16 +104,16 @@ WS_Batting <- BattingPost %>%
           "AB_HR" = ifelse(HR > 0, AB / HR, 0))
 ```
 
-```{r, echo=FALSE}
+```{r}
 # Filter the 'SeriePost' for WS from 1922-2020. Add a column to determine the total number of games played
 # in each World Series, then remove unecessary columns.
 
 WS_results <- SeriesPost %>%
   mutate("games_played" = wins + losses) %>%
   filter(round == "WS", 
-         yearID >= 1922 & yearID <= 2020,
-         games_played == 7) %>%
+         yearID >= 1922 & yearID <= 2020) %>%
   select(yearID, round, teamIDwinner, teamIDloser, games_played)
+
 
 ```
 
@@ -118,9 +122,8 @@ WS_results <- SeriesPost %>%
 # and 'teamID' = 'teamIDwinner' columns. This will return a table that contains only the batting information for 
 # the World Series winners.
 
-WS_Batting <- left_join(WS_Batting, WS_results, by = c("yearID", "round")) %>% 
-  filter(games_played == 7) %>%
-  select(-games_played)
+WS_Batting <- left_join(WS_Batting, WS_results, by = c("yearID", "round")) 
+   
 ```
 
 ```{r, echo=FALSE}
@@ -165,17 +168,21 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
 
 ```{r}
 
-WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+WS_Batting %>% group_by(yearID, teamID, games_played, Won.Lost) %>% 
   summarize("Total_HR" = sum(HR),
             'mean_Bat_Avg' = mean(Bat_Avg),
             "mean_AB_HR" = mean(AB_HR)) %>%
   ggplot() +
   geom_point(aes(x = yearID, y = Total_HR, color = Won.Lost), position = "dodge") +
   geom_smooth(aes(x = yearID, y = Total_HR, color = Won.Lost)) +
-  labs(title = "Total Home Runs Hit in WS",
-       subtitle = "(For WS Where All 7 Games Were Played)") +
+  labs(title = "Total Home Runs Hit in WS") +
   xlab("Year Played") +
-  ylab("Total Home Runs Hit")
+  ylab("Total Home Runs Hit") +
+  facet_wrap(~games_played, labeller = labeller(games_played =
+                                                  c("4" = "4 Game Series",
+                                                    "5" = "5 Game Series",
+                                                    "6" = "6 Game Series",
+                                                    "7" = "7 Game Series")))
 
 
 ```
@@ -190,18 +197,21 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
 
 ```{r}
 
-WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+WS_Batting %>% group_by(yearID, teamID, games_played, Won.Lost) %>% 
   summarize("Total_HR" = sum(HR),
             'mean_Bat_Avg' = mean(Bat_Avg),
             "mean_AB_HR" = mean(AB_HR)) %>%
   ggplot() +
   geom_point(aes(x = yearID, y = mean_Bat_Avg, color = Won.Lost), position = "dodge") +
-  geom_smooth(aes(x= yearID, y = mean_Bat_Avg)) +
-  labs(title = "Team Batting Average in WS",
-       subtitle = "(For WS Where All 7 Games Were Played)") +
+  geom_smooth(aes(x= yearID, y = mean_Bat_Avg, color = Won.Lost)) +
+  labs(title = "Team Batting Average in WS") +
   xlab("Year Played") +
   ylab("Team Batting Average") +
-  facet_wrap(~Won.Lost)
+  facet_wrap(~games_played, labeller = labeller(games_played =
+                                                  c("4" = "4 Game Series",
+                                                    "5" = "5 Game Series",
+                                                    "6" = "6 Game Series",
+                                                    "7" = "7 Game Series")))
 
 
 ```
@@ -211,22 +221,25 @@ Batting average for losing World Series teams is gradually decreasing.
 Batting average for winning World Series teams is gradually increasing. 
 
 
-**What trend if any exists, in batting average during the World Series?**
+**What trend if any exists, in at-bats per home run ratio during the World Series?**
 
 ```{r}
 
-WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+WS_Batting %>% group_by(yearID, teamID, games_played, Won.Lost) %>% 
   summarize("Total_HR" = sum(HR),
             'mean_Bat_Avg' = mean(Bat_Avg),
             "mean_AB_HR" = mean(AB_HR)) %>%
   ggplot() +
   geom_point(aes(x = yearID, y = mean_AB_HR, color = Won.Lost), position = "dodge") +
-  geom_smooth(aes(x= yearID, y = mean_AB_HR)) +
-  labs(title = "At-bat per Home Run Ratio in WS",
-       subtitle = "(For WS Where All 7 Games Were Played)") +
+  geom_smooth(aes(x= yearID, y = mean_AB_HR, color = Won.Lost)) +
+  labs(title = "At-bat per Home Run Ratio in WS") +
   xlab("Year Played") +
   ylab("At-Bat to Homerun Ratio") +
-  facet_wrap(~Won.Lost)
+  facet_wrap(~games_played, labeller = labeller(games_played =
+                                                  c("4" = "4 Game Series",
+                                                    "5" = "5 Game Series",
+                                                    "6" = "6 Game Series",
+                                                    "7" = "7 Game Series")))
 
 ```
 
@@ -238,7 +251,7 @@ more likely to see a homerun in fewer at-bats today, then we were in the past.
 **What is the relationship between batting average and home runs hit?**
 
 ```{r}
-WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+WS_Batting %>% group_by(yearID, teamID, games_played, Won.Lost) %>% 
   summarize("Total_HR" = sum(HR),
             'mean_Bat_Avg' = mean(Bat_Avg),
             "mean_AB_HR" = mean(AB_HR)) %>%
@@ -246,7 +259,12 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
   geom_boxplot(alpha = .3) +
   labs(title = "Total HR Hit") +
   xlab("") +
-  ylab("Total Home Runs Hit")
+  ylab("Total Home Runs Hit") +
+  facet_wrap(~games_played, labeller = labeller(games_played =
+                                                  c("4" = "4 Game Series",
+                                                    "5" = "5 Game Series",
+                                                    "6" = "6 Game Series",
+                                                    "7" = "7 Game Series")))
 
 ```
 
@@ -257,7 +275,7 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
 
 ```{r}
 
-WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+WS_Batting %>% group_by(yearID, teamID, games_played, Won.Lost) %>% 
   summarize("Total_HR" = sum(HR),
             'mean_Bat_Avg' = mean(Bat_Avg),
             "mean_AB_HR" = mean(AB_HR)) %>%
@@ -267,7 +285,12 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
   facet_wrap(~ Won.Lost) +
   labs(title = "Batting Avg vs. AB per HR Ratio") +
   xlab("Team Batting Average") +
-  ylab("At-bat per Home Run Ratio")
+  ylab("At-bat per Home Run Ratio") +
+  facet_wrap(~games_played, labeller = labeller(games_played =
+                                                  c("4" = "4 Game Series",
+                                                    "5" = "5 Game Series",
+                                                    "6" = "6 Game Series",
+                                                    "7" = "7 Game Series")))
 
 ```
 
@@ -282,7 +305,7 @@ tells us that winning team's at-bat per home run ratio is more evenly distribute
 
 ```{r}
 
-WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
+WS_Batting %>% group_by(yearID, teamID, games_played, Won.Lost) %>% 
   summarize("Total_HR" = sum(HR),
             'mean_Bat_Avg' = mean(Bat_Avg),
             "mean_AB_HR" = mean(AB_HR)) %>%
@@ -290,7 +313,12 @@ WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>%
   geom_density(alpha = .3) +
   #facet_wrap(~ Won.Lost) +
   labs(title = "Total Home Runs Hit") +
-  xlab("Number of Home Runs")
+  xlab("Number of Home Runs") +
+  facet_wrap(~games_played, labeller = labeller(games_played =
+                                                  c("4" = "4 Game Series",
+                                                    "5" = "5 Game Series",
+                                                    "6" = "6 Game Series",
+                                                    "7" = "7 Game Series")))
 
 ```
 
