@@ -1,13 +1,16 @@
 ---
-title: "Batting in the Win the World Series"
+title: "Batting to Win"
 author: "Angelica Morales & Gabriel Rodriguez"
-date: "4/24/2022"
+date: "4/28/2022"
 output: slidy_presentation
 ---
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(ggplot2)
+library(plotly)
 library(dbplyr)
+library(patchwork)
 library(Lahman)
 ```
 
@@ -17,7 +20,7 @@ library(Lahman)
 
 Explain what our project is about:
 
-We are doing our project on the realtion ship between batting average and home runs in the world series.
+
 
 Present our two main questions:
 We will look at how these two traditional statistics have changed, and which one is the biggest determinant 
@@ -37,7 +40,7 @@ for winning the World Series.
   + *Winner gets crowned WS champion and wins the Commissioner's Trophy*
   + *The best team in baseball for that season!*
   
-<img src="https://2qq12h8mzek4ddcxr8hr8ra7-wpengine.netdna-ssl.com/wp-content/uploads/2018/06/Astros-World-Series-trophy.jpg" width="1000" />
+<img src="https://2qq12h8mzek4ddcxr8hr8ra7-wpengine.netdna-ssl.com/wp-content/uploads/2018/06/Astros-World-Series-trophy.jpg" width="850" />
 
 
 ## Variables 
@@ -47,23 +50,15 @@ for winning the World Series.
   + **HR Def.** - *A home run occurs when a batter hits a fair ball and scores on the play without being put out or without the benefit                     of an error.*
   + **AKA** - *homer, dinger, blast, big fly, many more...*  
   
-  
-* **At-bats per HR (AB/HR)**  
-
-  + **AB/HR Def.** - *A measure of how frequently a batter hits a home run.*
-  + **Calculation** - *AB (At bats) / HR*
-    + **Lower** AB/HR = **more** frequent HR
-    + **Higher** AB/HR = **less** frequent HR  
     
-
 * **Batting Average (AVG)**  
 
   + **AVG Def.** - *the average performance of a batter, expressed as a ratio of a batter's safe hits per official times at bat.*
-  + **Calculation** - *Hits (H) / AB
+  + **Calculation** - *Number of Hits / Number of At Bats*
     + **Lower** AVG = **less** frequent *H*
     + **Higher** AVG = **more** frequent *H*
   
-  **NOTE:** Not all H are HR, but all HR are H
+  **NOTE:** Not all Hits are Home Runs, but all Home Runs **are** hits
 
 ## **Relationship Between Variables**  
 
@@ -74,82 +69,348 @@ for winning the World Series.
       + *AVG* - helps increase more scoring opportunities
     
     + **Players who hit:** 
-      + more home runs have lower batting average  
-      + less home runs have higher batting average
+      + more home runs have a lower batting average  
+      
+      <img src="https://cdn.cnn.com/cnnnext/dam/assets/130109104609-01-barry-bonds-0109.jpg" width="500" />
+      
+      
+      
+      + less home runs have a higher batting average
+      
+       <img src="https://static01.nyt.com/images/2020/09/28/sports/00ALTichiro-print/merlin_175905081_0c6b72ad-af53-4dbe-b6a7-396387300b45-jumbo.jpg?quality=75&auto=webp" width="500" />
+      
+
+
+```{r, echo=FALSE}
+
+Batting %>% filter(yearID > 1903, AB > 0) %>%
+  mutate("Batting_AVG" = H / AB) %>% 
+  group_by(yearID, teamID, Batting_AVG, HR) %>%
+  summarize("mean_Batting_AVG" = mean(Batting_AVG),
+            "mean_HR" = mean(HR)) %>%
+  ggplot(aes(x = mean_Batting_AVG, y = mean_HR)) + 
+  geom_point(alpha = .05) +
+  labs(title = "Batting Average vs. Home Runs") +
+  xlab("Batting AVG") +
+  ylab("Home Runs")
+  
+
+
+```
+
+
+## Data Used
+
+* **'Lahman'** Baseball Database  
+    + Created by Sean Lahman; Data Projects Manager for S.A.B.R (Society of American Baseball Research)
+    + Composed of 26 tables containing baseball data ranging from hitting and pitching for individual players, to 
+      salaries information, and postseason results.
+    + Database available in 'R'
+    
+* **'Batting' Table**  
+
+```{r, echo=FALSE}
+as_tibble(Batting)
+```
+  
+  
+* **'BattingPost' Table**  
+
+```{r, echo=FALSE}
+as_tibble(BattingPost)
+```
+
+
+* **'SeriesPost' Table**  
+
+```{r, echo=FALSE}
+as_tibble(SeriesPost)
+```
+
+
+## Data Cleaning/Tidying
+
+```{r, echo=FALSE}
+
+# We only want to look at World Series 'round' == 'WS' batting info.  
+WS_Batting <- BattingPost %>%
+  filter(round == "WS", 
+         yearID >= 1903) %>%
+  select(yearID, round, teamID, lgID, AB, H, HR)
+
+# Regular Season batting information
+RegSeason_Batting <- Batting %>%
+  filter(yearID >= 1903) %>%
+  select(yearID, teamID, lgID, AB, H, HR)
+
+
+# Clean and tidy World Series Batting data
+ WS_Batting <- WS_Batting %>% 
+  filter(AB > 0, lgID != "FL") %>%
+  rename("WS_HR" = HR) %>%
+  mutate("WS_AVG" = H / AB,
+         "WS_HR_AVG" = WS_HR / AB) %>%
+  select(yearID, teamID, lgID, WS_HR, WS_AVG, WS_HR_AVG) %>%
+  group_by(yearID, teamID, lgID) %>%
+  summarize("Total_WS_HR" = sum(WS_HR),
+            "Team_WS_HR_AVG" = mean(WS_HR_AVG),
+            "Team_WS_AVG" = mean(WS_AVG)
+  )
+
+# Clean and tidy Regular Season Batting data
+RegSeason_Batting <- RegSeason_Batting %>%
+  filter(AB > 0, lgID != "FL") %>%
+  rename("Reg_HR" = HR) %>%
+  mutate("Reg_AVG" = H / AB,
+         "Reg_HR_AVG" = Reg_HR / AB) %>%
+  select(yearID, teamID, lgID, Reg_HR, Reg_AVG, Reg_HR_AVG) %>%
+  group_by(yearID, teamID, lgID) %>%
+  summarize("Total_Reg_HR" = sum(Reg_HR),
+            "Team_Reg_HR_AVG" = mean(Reg_HR_AVG),
+            "Team_Reg_AVG" = mean(Reg_AVG)
+  )
+
+
+
+# Filter the 'SeriesPost' for WS round only. Add a column to determine the total game length of each WS
+WS_results <- SeriesPost %>%
+  mutate("Series_Length" = wins + losses) %>%
+  filter(round == "WS", 
+         yearID >= 1903) %>%
+  select(yearID, round, teamIDwinner, Series_Length)
+
+# Join 'WS_Batting' with 'WS_Results', by yearID
+WS_Batting <- left_join(WS_Batting, WS_results, by = c("yearID") )
+   
+# Add a won/lost column
+WS_Batting <- WS_Batting %>% 
+  mutate("Won/Lost" = ifelse(as.character(teamID) == as.character(teamIDwinner), "Won", "Lost"))  %>%
+  select(yearID, teamID, lgID, Total_WS_HR, Team_WS_HR_AVG, Team_WS_AVG, Series_Length, `Won/Lost`)
+
+# Join WS Batting data with Regular Season Batting Data
+Reg_WS_Batting <- left_join(WS_Batting, RegSeason_Batting, by = c("yearID", "teamID", "lgID"))
+
+```
+
+* **'RegSeason_Batting' Table**
+
+```{r, echo=FALSE}
+as_tibble(RegSeason_Batting)
+```
+
+* **'WS_Batting' Table**
+
+```{r, echo=FALSE}
+as_tibble(WS_Batting)
+```
+
+
+* **'Reg_WS_Batting' Table**  
+
+```{r, echo=FALSE}
+as_tibble(Reg_WS_Batting)
+```
+
+
+
+
+
+
+
+## Regular Season Home Runs      
+```{r, echo=FALSE}
+RegSeasonHR_plot <- RegSeason_Batting %>% ggplot(aes(x = yearID, y = Total_Reg_HR, color = lgID)) +
+  geom_point(alpha = .6) + 
+  labs(title = "Regular Season Team HR Totals",
+       subtitle = "(1903-2020)") +
+  xlab("Year") +
+  ylab("Home Runs Hit") 
+
+RegSeasonHR_plot
+```
+
+```{r, echo=FALSE}
+RegSeasonHR_plot + geom_smooth() + facet_wrap(~lgID)
+```
+
+
+
+
+## Regular Season Batting Average  
+```{r, echo=FALSE}
+RegSeasonAVG_plot <- RegSeason_Batting %>% ggplot(aes(x = yearID, y = Team_Reg_AVG, color = lgID)) +
+  geom_point(alpha = .6) + 
+  labs(title = "Regular Season Team AVG",
+       subtitle = "(1903-2020)") +
+  xlab("Year") +
+  ylab("Team AVG") 
+
+RegSeasonAVG_plot
+```
+
+```{r, echo=FALSE}
+RegSeasonAVG_plot + geom_smooth() + facet_wrap(~lgID)
+
+```
+
+## World Series Home Runs      
+```{r, echo=FALSE}
+WS_HR_plot <- WS_Batting %>% ggplot(aes(x = yearID, y = Total_WS_HR, color = lgID)) +
+  geom_point(alpha = .6) + 
+  labs(title = "World Series HR Totals",
+       subtitle = "(1903-2020)") +
+  xlab("Year") +
+  ylab("Home Runs Hit") 
+
+WS_HR_plot
+```
+
+```{r, echo=FALSE}
+WS_HR_plot + geom_smooth() + facet_wrap(~lgID)
+```
+
+## Regular Season HR vs. World Series Home Runs
+
+```{r, echo=FALSE,out.width= "65%"}
+RegSeasonHR_plot + geom_smooth() + WS_HR_plot + geom_smooth()
+```
+
+## World Series Batting Average
+
+```{r, echo=FALSE}
+WS_AVG_plot <- WS_Batting %>% ggplot(aes(x = yearID, y = Team_WS_AVG, color = lgID)) +
+  geom_point(alpha = .6) + 
+  labs(title = "World Series Team AVG",
+       subtitle = "(1903-2020)") +
+  xlab("Year") +
+  ylab("Team AVG") 
+
+WS_AVG_plot
+```
+
+```{r, echo=FALSE}
+WS_AVG_plot + geom_smooth() + facet_wrap(~lgID)
+```
+
+
+## Regular Season AVG vs. World Series AVG
+
+```{r, echo=FALSE,out.width= "65%"}
+RegSeasonAVG_plot + geom_smooth() + WS_AVG_plot + geom_smooth()
+```
+
+## So, what are the trends in HR and AVG?  
+
+
+|                     |Batting AVG           |Home Runs           |
+|:--------------------|:--------------------:|:--------------------:|
+|                     |                      |                      |
+|**Regular Season**   |*Decreasing*          |*Increasing*          |
+|                     |                      |                      |
+|**World Series**     |*Decreasing*          |*Increasing*          |  
+
+
+
 
 **So, is better to hit more homer runs, or hit for a higher batting aveage to win the World Series?**
 
-<img src="https://s.wsj.net/public/resources/images/BN-VU250_3g2fJ_HD_20171025133234.jpg" width="600" />
+<img src="https://s.wsj.net/public/resources/images/BN-VU250_3g2fJ_HD_20171025133234.jpg" width="900" />
   
 
 
+## Winning/Losing Team WS Home Runs
 
 
-  
-
-## Data Used
-The data used comes from the 'Lahman' baseball database. The Lahman Database was created by Sean Lahman; an investigative journalist for the USA Today Network, sports columnist for the New York Sun, and data projects manager for the Society of American Baseball Research. Lahman has also served as editor and contributor in several sports reference books.
-   
-For the purposes of this project we will be utilizing the 'BattingPost' table which includes individual player batting statistics for each different MLB postseason round from 1903 through 2020.
-
-The 'BattingPost' table contains a total of  15,460 unique observations. Each observation contains data that pertains to 22 different variables
-
-```{r}
-as_tibble(view(BattingPost))
+```{r, echo=FALSE}
+Reg_WS_Batting %>% ggplot(aes(x = yearID, y = Total_WS_HR, color = `Won/Lost`)) +
+  geom_point() +
+  labs(title = "Total World Series HR",
+       subtitle = "(1903-2020)") +
+  xlab("Year") +
+  ylab("Total HR")
 
 ```
 
-The 'SeriesPost' table contains a total of 358 unique observations. Each observation contains data that pertains to 9 different variables. This table tells us the winning and losing teams for each postseaon round from 1884-2020, as well has what leagues they belonged to, and how many games they won/lost. 
-
-```{r}
-
-as_tibble(view(SeriesPost))
-
-```
-
-## Data Cleaning/Tidying
-We only want to look at World Series 'WS' batting info from 1922-2020. The WS was first played in 1903 but didn't become a best of seven games series until 1922. Let's also remove the 'playerID' column as we will not need to know any individual player's name.
-```{r, echo=FALSE, results=TRUE}
-WS_Batting <- BattingPost %>%
-  filter(round == "WS", 
-         yearID >= 1922 & yearID <= 2020) %>%
-  select(yearID, round, teamID, G, AB, H, HR)
+```{r, echo=FALSE, out.width="60%"}
+Reg_WS_Batting %>% ggplot(aes(x = yearID, y = Total_WS_HR, color = `Won/Lost`)) +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap(~as_factor(Reg_WS_Batting$`Won/Lost`)) +
+  labs(title = "Total World Series HR",
+       subtitle = "(1903-2020)") +
+  xlab("Year") +
+  ylab("Total HR") 
 
 ```
 
-## Trend of home runs hit
+## Winning/Losing Team WS Home Runs 
 
-include graph, and observations
+```{r, echo=FALSE}
+Reg_WS_Batting %>% ggplot(aes(x = Total_WS_HR, fill = `Won/Lost`)) +
+  geom_boxplot(alpha = .3) +
+  labs(title = "Total World Series HR",
+       subtitle = "(1903-2020)") +
+  xlab("Total HR") +
+  ylab("")
+
+```
 
 
-## Trend of AB/HR
 
-include graph, and observations
+## Winning/Losing Team HR Density
 
-## Trend of Batting Average
+```{r, echo=FALSE}
+Reg_WS_Batting %>% ggplot(aes(x = Total_WS_HR, fill = `Won/Lost`)) +
+  geom_density(alpha = .3) +
+  labs(title = "Total World Series HR",
+       subtitle = "(1903-2020)") +
+  xlab("Total HR")
 
-include graph, and observations
+```
+
+## Winning/Losing Team WS Batting AVG
+
+```{r, echo=FALSE}
+Reg_WS_Batting %>% ggplot(aes(x = Team_WS_AVG, fill = `Won/Lost`)) +
+  geom_boxplot(alpha = .3) +
+  labs(title = "Team WS Batting AVG",
+       subtitle = "(1903-2020)") +
+  xlab("Batting AVG") +
+  ylab("")
+
+```
 
 
-## Compare home runs hit for winning/losing teams
+## Winning/Losing Teams AVG Density
 
-graph, observations
+```{r, echo=FALSE}
+Reg_WS_Batting %>% ggplot(aes(x = Team_WS_AVG, fill = `Won/Lost`)) +
+  geom_density(alpha = .3) +
+  labs(title = "World Series Batting AVG",
+       subtitle = "(1903-2020)") +
+  xlab("AVG")
 
-## Compare AB/HR for winning/losing teams
+```
 
-graph, observations
+## Winning/Losing Home Run AVG Density
 
-## Compare batting average for winning/losing teams
+```{r, echo=FALSE}
+Reg_WS_Batting %>% ggplot(aes(x = Team_WS_HR_AVG, fill = `Won/Lost`)) +
+  geom_density(alpha = .3) +
+  labs(title = "World Series Home Run AVG",
+       subtitle = "(1903-2020)") +
+  xlab("Home Run AVG")
 
-graph, observations
+```
+## Winning/Losing Teams Batting in Regular Season vs. World Series
 
-## Look at frequency of home runs for winning/losing teams
+```{r, echo=FALSE}
 
-graph, observations
+Reg_WS_Batting %>% filter(`Won/Lost` == as_factor('Won')) %>%
+  ggplot(aes(x = yearID)) +
+  geom_point(aes(y = Team_Reg_AVG, Team_WS_AVG))
 
-## Look at frequency of batting average for winning/losing teams
-
-graph, observations
+```
 
 ## Results
 
@@ -157,6 +418,9 @@ Summary of trends. What can we expect to see in future World Series'?
 
 Can we determine if hitting more home runs or hitting for a higher batting
 average is more condusive to winning the World Series? Why or why not?
+
+
+
 
 
 ## Conclusion
