@@ -11,6 +11,7 @@ library(ggplot2)
 library(plotly)
 library(dbplyr)
 library(patchwork)
+library(ggthemes)
 library(Lahman)
 ```
 
@@ -18,14 +19,8 @@ library(Lahman)
 
 ## Introduction
 
-Explain what our project is about:
 
-
-
-Present our two main questions:
-We will look at how these two traditional statistics have changed, and which one is the biggest determinant 
-for winning the World Series. 
-
+![](https://www.historyamerica.us/01/images/products/large/history-of-american-baseball-poster.jpg)
 
 
 
@@ -83,18 +78,22 @@ for winning the World Series.
 
 ```{r, echo=FALSE}
 
-Batting %>% filter(yearID > 1903, AB > 0) %>%
+Batting %>% filter(yearID > 1903, AB >= 502) %>%
   mutate("Batting_AVG" = H / AB) %>% 
-  group_by(yearID, teamID, Batting_AVG, HR) %>%
+  group_by(playerID) %>%
   summarize("mean_Batting_AVG" = mean(Batting_AVG),
-            "mean_HR" = mean(HR)) %>%
-  ggplot(aes(x = mean_Batting_AVG, y = mean_HR)) + 
-  geom_point(alpha = .05) +
-  labs(title = "Batting Average vs. Home Runs") +
+            "total_HR" = sum(HR)) %>%
+  ggplot(aes(x = mean_Batting_AVG, y = total_HR)) + 
+  geom_point(alpha = .25) +
+  labs(title = "Player Career Batting Averages vs. Home Runs",
+       subtitle = "Regular Season 1903-2020 (Min. 502 At-Bats)") +
   xlab("Batting AVG") +
-  ylab("Home Runs")
+  ylab("Home Runs") +
+  xlim(.150,.4) +
+  theme_hc() +
+  scale_colour_hc() + 
+  geom_smooth()
   
-
 
 ```
 
@@ -224,9 +223,11 @@ RegSeasonHR_plot <- RegSeason_Batting %>% ggplot(aes(x = yearID, y = Total_Reg_H
   labs(title = "Regular Season Team HR Totals",
        subtitle = "(1903-2020)") +
   xlab("Year") +
-  ylab("Home Runs Hit") 
+  ylab("Home Runs Hit")  +
+  theme_hc() +
+  scale_fill_hc()
 
-RegSeasonHR_plot
+RegSeasonHR_plot 
 ```
 
 ```{r, echo=FALSE}
@@ -243,7 +244,9 @@ RegSeasonAVG_plot <- RegSeason_Batting %>% ggplot(aes(x = yearID, y = Team_Reg_A
   labs(title = "Regular Season Team AVG",
        subtitle = "(1903-2020)") +
   xlab("Year") +
-  ylab("Team AVG") 
+  ylab("Team AVG") +
+  theme_hc() +
+  scale_fill_hc()
 
 RegSeasonAVG_plot
 ```
@@ -260,7 +263,9 @@ WS_HR_plot <- WS_Batting %>% ggplot(aes(x = yearID, y = Total_WS_HR, color = lgI
   labs(title = "World Series HR Totals",
        subtitle = "(1903-2020)") +
   xlab("Year") +
-  ylab("Home Runs Hit") 
+  ylab("Home Runs Hit") +
+  theme_hc() +
+  scale_fill_hc()
 
 WS_HR_plot
 ```
@@ -272,7 +277,7 @@ WS_HR_plot + geom_smooth() + facet_wrap(~lgID)
 ## Regular Season HR vs. World Series Home Runs
 
 ```{r, echo=FALSE,out.width= "65%"}
-RegSeasonHR_plot + geom_smooth() + WS_HR_plot + geom_smooth()
+RegSeasonHR_plot + WS_HR_plot 
 ```
 
 ## World Series Batting Average
@@ -283,7 +288,9 @@ WS_AVG_plot <- WS_Batting %>% ggplot(aes(x = yearID, y = Team_WS_AVG, color = lg
   labs(title = "World Series Team AVG",
        subtitle = "(1903-2020)") +
   xlab("Year") +
-  ylab("Team AVG") 
+  ylab("Team AVG") +
+  theme_hc() +
+  scale_fill_hc()
 
 WS_AVG_plot
 ```
@@ -327,7 +334,9 @@ Reg_WS_Batting %>% ggplot(aes(x = yearID, y = Total_WS_HR, color = `Won/Lost`)) 
   labs(title = "Total World Series HR",
        subtitle = "(1903-2020)") +
   xlab("Year") +
-  ylab("Total HR")
+  ylab("Total HR") +
+  theme_hc() +
+  scale_fill_hc()
 
 ```
 
@@ -339,7 +348,9 @@ Reg_WS_Batting %>% ggplot(aes(x = yearID, y = Total_WS_HR, color = `Won/Lost`)) 
   labs(title = "Total World Series HR",
        subtitle = "(1903-2020)") +
   xlab("Year") +
-  ylab("Total HR") 
+  ylab("Total HR") +
+  theme_hc() +
+  scale_fill_hc()
 
 ```
 
@@ -351,7 +362,9 @@ Reg_WS_Batting %>% ggplot(aes(x = Total_WS_HR, fill = `Won/Lost`)) +
   labs(title = "Total World Series HR",
        subtitle = "(1903-2020)") +
   xlab("Total HR") +
-  ylab("")
+  ylab("") +
+  theme_hc() +
+  scale_fill_hc()
 
 ```
 
@@ -364,7 +377,9 @@ Reg_WS_Batting %>% ggplot(aes(x = Total_WS_HR, fill = `Won/Lost`)) +
   geom_density(alpha = .3) +
   labs(title = "Total World Series HR",
        subtitle = "(1903-2020)") +
-  xlab("Total HR")
+  xlab("Total HR") +
+  theme_hc() +
+  scale_fill_hc()
 
 ```
 
@@ -376,7 +391,9 @@ Reg_WS_Batting %>% ggplot(aes(x = Team_WS_AVG, fill = `Won/Lost`)) +
   labs(title = "Team WS Batting AVG",
        subtitle = "(1903-2020)") +
   xlab("Batting AVG") +
-  ylab("")
+  ylab("") +
+  theme_hc() +
+  scale_fill_hc()
 
 ```
 
@@ -388,7 +405,9 @@ Reg_WS_Batting %>% ggplot(aes(x = Team_WS_AVG, fill = `Won/Lost`)) +
   geom_density(alpha = .3) +
   labs(title = "World Series Batting AVG",
        subtitle = "(1903-2020)") +
-  xlab("AVG")
+  xlab("AVG") +
+  theme_hc() +
+  scale_fill_hc()
 
 ```
 
@@ -399,20 +418,14 @@ Reg_WS_Batting %>% ggplot(aes(x = Team_WS_HR_AVG, fill = `Won/Lost`)) +
   geom_density(alpha = .3) +
   labs(title = "World Series Home Run AVG",
        subtitle = "(1903-2020)") +
-  xlab("Home Run AVG")
+  xlab("Home Run AVG") +
+  theme_hc() +
+  scale_fill_hc()
 
-```
-## Winning/Losing Teams Batting in Regular Season vs. World Series
+```  
 
-```{r, echo=FALSE}
 
-Reg_WS_Batting %>% filter(`Won/Lost` == as_factor('Won')) %>%
-  ggplot(aes(x = yearID)) +
-  geom_point(aes(y = Team_Reg_AVG, Team_WS_AVG))
-
-```
-
-## Results
+## Summary
 
 Summary of trends. What can we expect to see in future World Series'?
 
@@ -420,12 +433,18 @@ Can we determine if hitting more home runs or hitting for a higher batting
 average is more condusive to winning the World Series? Why or why not?
 
 
+## Limitations of our Analysis
+
+* World Series have been played in 4, 5, 6, 7 games. We just looked at the averages of all these series. The results
+  may vary depending on the game length of the series, especially between the shortest 4 game series and the fully 
+  played 7 game series.
+  
+* 
 
 
 
 ## Conclusion
 
-Nice goodbye, and thanks. 
 
 
 
