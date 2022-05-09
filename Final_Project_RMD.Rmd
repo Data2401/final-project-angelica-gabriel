@@ -1,374 +1,443 @@
 ---
-title: "Batting Average or Home Runs to Win the World Series?"
+title: "Batting to Win"
 author: "Angelica Morales & Gabriel Rodriguez"
 date: "4/24/2022"
 output: html_document
 ---
 # Introduction
+***
 
-Since it's inception in 1903, being crowned the World Series champion has been the goal of any team in Major League
-Baseball. Since then, professional baseball has gone through a multitude of different changes that have evolved it 
-into the very technologically and analytically driven sport that exists today. 
-
-All those things have changed, but one of the few things that remains the same, is the World Series; a best of seven game
-series played between the two different league champions to determine who will be that season's champion. 
-
-What this project hopes to accomplish is to observe the trends (if any), in batting average and home runs during the world
-series, as well as look at the relationship between batting average and home runs between the winning and losing teams. 
-Any trends will help us predict what kind of batting average and home run number we can expect in future World Series', and
-any relationship between batting average and total home runs hits, will help us determine which of those statistics are more
-important to winning the World Series.
-
-For the purposes of this project we will be looking at World Series' played after 1922, as this is the year that the series
-became a best of seven games series, and we will also only look at batting data for World Series' in which the full seven
-games were played so as to limit how skewed our data will be. 
+Often referred to as “America’s Pastime” , baseball is part of this country’s culture, spanning over 145 years of it’s history. During which time, baseball data has evolved from simple number gathering, to a much more complex form of analysis known today as “sabermetrics” that strives to evaluate and compare player performance using several different variables. 
 
 
-## The big question? 
+What this project hopes to accomplish is to observe the trends in two of the more traditional baseball batting statistics: batting average and home runs to determine how they've changed through the sports history, and also what role they play in deciding the winning and losing World Series teams.
 
-What trends exist in batting average, and total home runs hit, in the World Series?
-Is team batting average, or total home runs hit a better indicator of which team will win the World Series. 
+We will look at the trends of these statistics through baseball's regular season as well as the World Series. We will then examine the relationship between team batting average and total home runs hit by teams that play in the World Series.  
 
-
+Any trends will help us predict what kind of batting average and home run numbers we can see in future regular seasons as well as World Series'. Any relationship between team batting average and total home runs hit, will help us determine which of those statistics are more important to winning the World Series.
 
 ## Packages Used
-```{r}
 
-# Libraries we will be using for this exploration
-
+```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(ggplot2)
+library(plotly)
+library(dbplyr)
+library(patchwork)
+library(ggthemes)
 library(Lahman)
+```
+
+
+## Historical Context
+
+The World Series is the annual championship series played between the two respective league (American League and National League) champions in Major League Baseball. Winning the World Series is what every team and player strive for at the start of the season, and is therefore deemed the greatest achievement in all of baseball.
+
+Although first played 1884, the modern era of the World Series is considered to being in 1903, when the series became a “best-of-7 game series”. We will only be looking at data from 1903-2020 (Lahman Database only contains data up to 2020). There have been a total of 116 World Series played between these years (the exceptions being: 1904, and 1994). 
+
+```{r, echo=FALSE}
+SeriesPost %>% group_by(round) %>% filter(round == 'WS', yearID >= 1903) %>% count()
 
 ```
+
+
+## Variables Used
+
+To better understand the data we will be exploring, and why we chose it, let’s define our variables. Two of the most traditional statistics in baseball, are the Home Run, and Batting Average. 
+
+A **home run** occurs when a batter hits a fair ball and scores on the play without being put out or without benefit of an error. 
+
+**Batting Average** is the average performance of a batter, expressed as a ratio of a batter’s safe hits per official times at bat. It is calculated by dividing the number of hits by the number of at bats. 
+
+
+**Relationship Between Home Runs and Batting Average**
+
+The relationship between Home Runs and Batting average, is as old as baseball itself. There has always been a debate on which is more beneficial: hitting a greater number of home runs, or hitting for a higher batting average. 
+
+
+```{r, echo=FALSE}
+
+Batting %>% filter(yearID > 1903, AB >= 502) %>%
+  mutate("Batting_AVG" = H / AB) %>% 
+  group_by(playerID) %>%
+  summarize("mean_Batting_AVG" = mean(Batting_AVG),
+            "total_HR" = sum(HR)) %>%
+  ggplot(aes(x = mean_Batting_AVG, y = total_HR)) + 
+  geom_point(alpha = .25) +
+  labs(title = "Player Career Batting Averages vs. Home Runs",
+       subtitle = "Regular Season 1903-2020 (Min. 502 At-Bats)") +
+  xlab("Batting AVG") +
+  ylab("Home Runs") +
+  xlim(.150,.4) +
+  theme_hc() +
+  scale_colour_hc() + 
+  geom_smooth()
+  
+
+```
+
+
+This graph shows us the relationship between player’s career batting average and home runs hit; and although there is a positive relationship between the two, many batters with career averages over or around .300 (what is considered a great batting average) hit less than 200 career home runs. On the other hand, a good majority of players who hit more than 200 career home runs have batting averages under .300. 
 
 ## Data Used
+***
 
-The data used comes from the 'Lahman' baseball database. The Lahman Database was created by Sean Lahman; 
-an investigative journalist for the USA Today Network, sports columnist for the New York Sun, and data
-projects manager for the Society of American Baseball Research. Lahman has also served as editor 
-and contributor in several sports reference books.
-   
-**'BattingPost'** - This table contains individual player batting statistics for each different MLB postseason round from
-1903 through 2020. It includes a total of  15,460 unique observations. Each observation contains data that pertains to 
-22 different variables including: *'yearID'*, *'round'*, *'playerID'*, *'teamID'*, league ID (*'lgID'*), games played (*'G'*), and 16 
-different batting statistics. 
+We sourced our data from the ‘Lahman’ Baseball Database. Sean Lahman, the creator of the database is an investigative journalist, a sports column writer, author, and Data Projects Manager for the Society of American Baseball Research.
+The database is composed of 26 tables that each consist of unique baseball data ranging from baseball and pitching statistics for individual players, to salary information, and postseason results. The package is available in ‘R’.
+    
+* **'Batting' Table**  
 
-**'SeriesPost'** - This table contains data for series results for each different MLB postseason round from 1903 through 2020.
-It includes a total of 358 unique observations. Each observations has data for 9 different variables including: *'yearID'*, 
-*'round'*, *'teamIDwinner'*, *'lgIDwinner'*, *'teamIDloser'*, *'lgIDloser'*, *'wins'*, *'losses'*, and *'ties'*. 
+From the database, we worked with data found in the ‘Batting Table’, which contains regular season batting statistics for individual players from 1871 to 2020.
 
+```{r, echo=FALSE}
+as_tibble(Batting)
+```
+  
+  
+* **'BattingPost' Table** 
 
-```{r}
-as_tibble(view(BattingPost))
+The ‘BattingPost’ table, contains individual players batting statistics for every different playoff round played between 1884 and 2020.
 
+```{r, echo=FALSE}
+as_tibble(BattingPost)
 ```
 
-The 'SeriesPost' table contains a total of 358 unique observations. Each observation contains data that 
-pertains to 9 different variables. This table tells us the winning and losing teams for each postseaon
-round from 1884-2020, as well has what leagues they belonged to, and how many games they won/lost. 
 
-```{r}
+* **'SeriesPost' Table**  
 
-as_tibble(view(SeriesPost))
+Finally, we also used the ‘SeriesPost’ table which contains data regarding playoff round results.
 
+```{r, echo=FALSE}
+as_tibble(SeriesPost)
 ```
 
 
 ## Data Cleaning/Tidying
+***
+
+Our data cleaning and tidying consisted, first of filtering all our data for only data from starting year 1903. We also added batting average columns (there is no batting average statistic in the ‘Batting’ or ‘BattingPost’ table), and grouped all our observations by ‘yearID’, and ‘teamID’ to get team batting information for every season. For the ‘SeriesPost’ table we filtered out all observations that weren’t World Series Results, added a ‘Won/Lost’ column, and finally we merged the regular season and post season batting data to the World Series Results. 
+
+We ended with 3: “Regular Season Batting”, “World Series Batting”, and “Regular/World Series Batting” with series results. 
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE}
 
-
-# We only want to look at World Series 'WS' batting info from 1922-2020. The WS was first played in 1903 but
-# didn't become a best of seven games series until 1922. Let's also remove the 'playerID' column as
-# we will not need to know any individual player's name. 
-
+# We only want to look at World Series 'round' == 'WS' batting info.  
 WS_Batting <- BattingPost %>%
   filter(round == "WS", 
-         yearID >= 1922 & yearID <= 2020) %>%
-  select(yearID, round, teamID, G, AB, H, HR)
+         yearID >= 1903) %>%
+  select(yearID, round, teamID, lgID, AB, H, HR)
+
+# Regular Season batting information
+RegSeason_Batting <- Batting %>%
+  filter(yearID >= 1903) %>%
+  select(yearID, teamID, lgID, AB, H, HR)
 
 
-```
-
-
-
-```{r}
-# Add batting average statistic
-# We will also add 
+# Clean and tidy World Series Batting data
  WS_Batting <- WS_Batting %>% 
-  filter(AB > 0) %>%
-   mutate("Bat_Avg" = H / AB,
-          "AB_HR" = ifelse(HR > 0, AB / HR, 0))
-```
+  filter(AB > 0, lgID != "FL") %>%
+  rename("WS_HR" = HR) %>%
+  mutate("WS_AVG" = H / AB,
+         "WS_HR_AVG" = WS_HR / AB) %>%
+  select(yearID, teamID, lgID, WS_HR, WS_AVG, WS_HR_AVG) %>%
+  group_by(yearID, teamID, lgID) %>%
+  summarize("Total_WS_HR" = sum(WS_HR),
+            "Team_WS_HR_AVG" = mean(WS_HR_AVG),
+            "Team_WS_AVG" = mean(WS_AVG)
+  )
 
-```{r}
-# Filter the 'SeriePost' for WS from 1922-2020. Add a column to determine the total number of games played
-# in each World Series, then remove unecessary columns.
+# Clean and tidy Regular Season Batting data
+RegSeason_Batting <- RegSeason_Batting %>%
+  filter(AB > 0, lgID != "FL") %>%
+  rename("Reg_HR" = HR) %>%
+  mutate("Reg_AVG" = H / AB,
+         "Reg_HR_AVG" = Reg_HR / AB) %>%
+  select(yearID, teamID, lgID, Reg_HR, Reg_AVG, Reg_HR_AVG) %>%
+  group_by(yearID, teamID, lgID) %>%
+  summarize("Total_Reg_HR" = sum(Reg_HR),
+            "Team_Reg_HR_AVG" = mean(Reg_HR_AVG),
+            "Team_Reg_AVG" = mean(Reg_AVG)
+  )
 
+
+
+# Filter the 'SeriesPost' for WS round only. Add a column to determine the total game length of each WS
 WS_results <- SeriesPost %>%
-  mutate("games_played" = wins + losses) %>%
+  mutate("Series_Length" = wins + losses) %>%
   filter(round == "WS", 
-         yearID >= 1922 & yearID <= 2020) %>%
-  select(yearID, round, teamIDwinner, teamIDloser, games_played)
+         yearID >= 1903) %>%
+  select(yearID, round, teamIDwinner, Series_Length)
 
-
-```
-
-```{r, echo=FALSE}
-# We will use the 'inner_join' function to join our 'WS_Batting' table with the 'Series_Winner' table on the 'yearID',
-# and 'teamID' = 'teamIDwinner' columns. This will return a table that contains only the batting information for 
-# the World Series winners.
-
-WS_Batting <- left_join(WS_Batting, WS_results, by = c("yearID", "round")) 
+# Join 'WS_Batting' with 'WS_Results', by yearID
+WS_Batting <- left_join(WS_Batting, WS_results, by = c("yearID") )
    
+# Add a won/lost column
+WS_Batting <- WS_Batting %>% 
+  mutate("Won/Lost" = ifelse(as.character(teamID) == as.character(teamIDwinner), "Won", "Lost"))  %>%
+  select(yearID, teamID, lgID, Total_WS_HR, Team_WS_HR_AVG, Team_WS_AVG, Series_Length, `Won/Lost`)
+
+# Join WS Batting data with Regular Season Batting Data
+Reg_WS_Batting <- left_join(WS_Batting, RegSeason_Batting, by = c("yearID", "teamID", "lgID"))
+
 ```
+
+* **'RegSeason_Batting' Table**
+
+Includes regular season team batting averages and total home runs hit for every year and team from 1903-2020.
 
 ```{r, echo=FALSE}
-# Add a won/lost column
+as_tibble(RegSeason_Batting)
+```
 
-WS_Batting <- WS_Batting %>% 
-  mutate(Won.Lost = if_else(as.character(.$teamID) == as.character(.$teamIDwinner), 'Won', 'Lost'))
+* **'WS_Batting' Table**
 
+Includes World Series team batting averages and total home runs hit for every year and team from 1903-2020.
+
+```{r, echo=FALSE}
+as_tibble(WS_Batting)
 ```
 
 
-## Data Exploration
+* **'Reg_WS_Batting' Table**  
+
+Includes regular season/World Series team batting averages and total home runs hit only for teams that made the World Series, as well as whether the team won or lost the series. 
+
+```{r, echo=FALSE}
+as_tibble(Reg_WS_Batting)
+```
 
 
-Let's get some historical context first, and see how many World Series' have been played out to the maximum
-7 games.
 
-There have been 39 World Series' between 1922-2020 in which all seven games have been played. 
-```{r}
 
-WS_Batting %>% group_by(yearID) %>% summarize(n = n()) %>% n_distinct()
+# Regular Season/World Series Trends
+***
+
+
+## Regular Season Home Runs      
+```{r, echo=FALSE,results='hide',fig.keep='all', message=FALSE}
+RegSeasonHR_plot <- RegSeason_Batting %>% ggplot(aes(x = yearID, y = Total_Reg_HR, color = lgID)) +
+  geom_point(alpha = .6) + 
+  labs(title = "Regular Season Team HR Totals",
+       subtitle = "(1903-2020)") +
+  xlab("Year") +
+  ylab("Total Home Runs Hit")  +
+  theme_hc() +
+  scale_fill_hc()
+
+RegSeasonHR_plot 
+```
+
+
+Our first graph shows regular season team home run totals. An increase in the number of home runs being hit can be attributed to different team expansions that have occurred through the decades which has seen the number of baseball teams increase from 16 teams in 1903 to 30 teams currently.
+
+The last expansion happened in 1998 and we continue to see an increasing trend in home runs being hit. It should also be noted that the number of total home runs hit is much lower in 2020. This can be attributed to the shortened season that year, in which only 60 regular season games were played because of the pandemic.   
+
+
+
+```{r, echo=FALSE,results='hide',fig.keep='all', message=FALSE}
+RegSeasonHR_plot + geom_smooth() + facet_wrap(~lgID)
+```
+
+Both the American League and National League have seen similar increase in total home runs being hit. American League totals are higher overall when compared to National League totals however, and this is likely due to the fact that the American League incorporates a "designated hitter" to hit in place of the pitcher in the batting order. This makes it that there is another player in the batting order that specializes in hitting as opposed to pitching, and therefore increases home run numbers for that team. 
+
+
+
+## Regular Season Batting Average  
+```{r, echo=FALSE,results='hide',fig.keep='all', message=FALSE}
+RegSeasonAVG_plot <- RegSeason_Batting %>% ggplot(aes(x = yearID, y = Team_Reg_AVG, color = lgID)) +
+  geom_point(alpha = .6) + 
+  labs(title = "Regular Season Team Batting AVG",
+       subtitle = "(1903-2020)") +
+  xlab("Year") +
+  ylab("Team Batting AVG") +
+  theme_hc() +
+  scale_fill_hc()
+
+RegSeasonAVG_plot
+```
+
+When we look at regular season team batting averages, we don’t see a defined trend initially, but looking at each league independently we can see the team batting averages for the American League, are much more varied when compared to the National League after the early 1970’s. 
+
+
+```{r, echo=FALSE,results='hide',fig.keep='all', message=FALSE}
+RegSeasonAVG_plot + geom_smooth() + facet_wrap(~lgID)
 
 ```
 
-What were the total number of Home Runs hit by each team, mean batting average, and mean AB per HR ratio?
-
-```{r}
-
-# Total number of home runs, mean Batting Average, mean At-Bats per Home Run Ratio
-
-WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
-  summarize("Total_HR" = sum(HR),
-            'mean_Bat_Avg' = mean(Bat_Avg),
-            "mean_AB_HR" = mean(AB_HR))
+Batting averages increased substantially for the American League from the early 1970’s all the ways to the late 80’s followed by a substantial decrease. Again we can attribute this to the designated hitter being adopted by the American League. Batting average also on the decrease from early 90’s onward. Batting averages, for the American League ARE higher overall when compared to the National League.
 
 
-```
 
-### Trends in Batting Average and Total Home Runs Hit
-
-**What trend if any exists, in total home runs being hit during the World Series?**
-
-```{r}
-
-WS_Batting %>% group_by(yearID, teamID, games_played, Won.Lost) %>% 
-  summarize("Total_HR" = sum(HR),
-            'mean_Bat_Avg' = mean(Bat_Avg),
-            "mean_AB_HR" = mean(AB_HR)) %>%
-  ggplot() +
-  geom_point(aes(x = yearID, y = Total_HR, color = Won.Lost), position = "dodge") +
-  geom_smooth(aes(x = yearID, y = Total_HR, color = Won.Lost)) +
-  labs(title = "Total Home Runs Hit in WS") +
-  xlab("Year Played") +
+## World Series Home Runs      
+```{r, echo=FALSE,results='hide',fig.keep='all', message=FALSE}
+WS_HR_plot <- WS_Batting %>% ggplot(aes(x = yearID, y = Total_WS_HR, color = lgID)) +
+  geom_point(alpha = .6) + 
+  labs(title = "World Series HR Totals",
+       subtitle = "(1903-2020)") +
+  xlab("Year") +
   ylab("Total Home Runs Hit") +
-  facet_wrap(~games_played, labeller = labeller(games_played =
-                                                  c("4" = "4 Game Series",
-                                                    "5" = "5 Game Series",
-                                                    "6" = "6 Game Series",
-                                                    "7" = "7 Game Series")))
+  theme_hc() +
+  scale_fill_hc()
 
-
-```
- 
- 
- More World Series games went to a decisive game 7 between the 25 year time span of 1950-1975. 
- 
- There have not been many World Series played, that require all 7 games, in the last 20 years,
- but we have seen more total home runs hit by **both** winning and losing teams in those games. 
- 
-**What trend if any exists, in batting average during the World Series?**
-
-```{r}
-
-WS_Batting %>% group_by(yearID, teamID, games_played, Won.Lost) %>% 
-  summarize("Total_HR" = sum(HR),
-            'mean_Bat_Avg' = mean(Bat_Avg),
-            "mean_AB_HR" = mean(AB_HR)) %>%
-  ggplot() +
-  geom_point(aes(x = yearID, y = mean_Bat_Avg, color = Won.Lost), position = "dodge") +
-  geom_smooth(aes(x= yearID, y = mean_Bat_Avg, color = Won.Lost)) +
-  labs(title = "Team Batting Average in WS") +
-  xlab("Year Played") +
-  ylab("Team Batting Average") +
-  facet_wrap(~games_played, labeller = labeller(games_played =
-                                                  c("4" = "4 Game Series",
-                                                    "5" = "5 Game Series",
-                                                    "6" = "6 Game Series",
-                                                    "7" = "7 Game Series")))
-
-
+WS_HR_plot
 ```
 
-Batting average for losing World Series teams is gradually decreasing.
-
-Batting average for winning World Series teams is gradually increasing. 
+We can see from this first graph that during the first 20 years of the World Series most teams hit less than 5 total home runs, with quite a few hitting zero home runs. However, every single team to play in the world series after 1950 has hit at least one home run. During the last 20 years we can see more teams staring to hit more than 10 home runs, indicating that home runs are on the rise. 
 
 
-**What trend if any exists, in at-bats per home run ratio during the World Series?**
-
-```{r}
-
-WS_Batting %>% group_by(yearID, teamID, games_played, Won.Lost) %>% 
-  summarize("Total_HR" = sum(HR),
-            'mean_Bat_Avg' = mean(Bat_Avg),
-            "mean_AB_HR" = mean(AB_HR)) %>%
-  ggplot() +
-  geom_point(aes(x = yearID, y = mean_AB_HR, color = Won.Lost), position = "dodge") +
-  geom_smooth(aes(x= yearID, y = mean_AB_HR, color = Won.Lost)) +
-  labs(title = "At-bat per Home Run Ratio in WS") +
-  xlab("Year Played") +
-  ylab("At-Bat to Homerun Ratio") +
-  facet_wrap(~games_played, labeller = labeller(games_played =
-                                                  c("4" = "4 Game Series",
-                                                    "5" = "5 Game Series",
-                                                    "6" = "6 Game Series",
-                                                    "7" = "7 Game Series")))
-
+```{r, echo=FALSE,results='hide',fig.keep='all', message=FALSE}
+WS_HR_plot + geom_smooth() + facet_wrap(~lgID)
 ```
 
-
-At-bat to home run ratio is increasing at a similar rate for both losing and winning teams. This means that we are 
-more likely to see a homerun in fewer at-bats today, then we were in the past. 
+Faceting the graph to look at total home runs hit by each league, and adding a trend line, we can see that total home runs are up for both leagues at a very similar rate. In this instance, the designated hitter (which we have seen make a difference in total home runs hit in the regular season between the American League and National League) does not have much impact. For World Series games played, the designated hitter is added or removed according to the the league that the home team belongs to. There is no benefit to one particular team.  
 
 
-**What is the relationship between batting average and home runs hit?**
+## Regular Season HR vs. World Series Home Runs
 
-```{r}
-WS_Batting %>% group_by(yearID, teamID, games_played, Won.Lost) %>% 
-  summarize("Total_HR" = sum(HR),
-            'mean_Bat_Avg' = mean(Bat_Avg),
-            "mean_AB_HR" = mean(AB_HR)) %>%
-  ggplot(aes(x = c(Won.Lost), y = Total_HR, fill = Won.Lost)) +
+```{r, echo=FALSE,results='hide',fig.keep='all', message=FALSE,out.width= "65%"}
+RegSeasonHR_plot + WS_HR_plot 
+```
+Comparing the graphs for trends in total home runs hit in the regular season versus the World Series we can see that both follow a similar increase. As mentioned previously, we can attribute the increase in home runs during the regular season to teams being added throughout the years. We also see an increase in home runs being hit during the World Series, this may be due to a number of other variables like advances in training regimens, batting mechanics, technology, etc.  
+
+
+## World Series Batting Average
+
+```{r, echo=FALSE,results='hide',fig.keep='all', message=FALSE}
+WS_AVG_plot <- WS_Batting %>% ggplot(aes(x = yearID, y = Team_WS_AVG, color = lgID)) +
+  geom_point(alpha = .6) + 
+  labs(title = "World Series Team Batting AVG",
+       subtitle = "(1903-2020)") +
+  xlab("Year") +
+  ylab("Team Batting AVG") +
+  theme_hc() +
+  scale_fill_hc()
+
+WS_AVG_plot
+```
+
+Now, we’ll look at world series team batting averages. Only 14 teams have had a batting average above .300, 9 being National League teams, and 5 being American League teams. 
+
+
+```{r, echo=FALSE,results='hide',fig.keep='all', message=FALSE}
+WS_AVG_plot + geom_smooth() + facet_wrap(~lgID)
+```
+We can get a better look if we split the teams up by their respective league. For the American League, teams have batted for a .200 average fairly consistently through time. We see more variation for teams in the National League, but we have seen them have a higher batting average than the American League overall since right around 1975.
+
+ 
+## Regular Season AVG vs. World Series AVG
+
+```{r, echo=FALSE,results='hide',fig.keep='all', message=FALSE, out.width= "65%"}
+RegSeasonAVG_plot + geom_smooth() + WS_AVG_plot + geom_smooth()
+```
+Comparing regular season team batting averages to world series team batting averages, we see that regular season batting average has a lot more variation throughout the las century, with the American league having even greater variation than the national league. As low as .190 in the late 1960’s to as high as .240 in the late 1980’s. For World Series team batting averages, they have tended to stay more consistent, hovering around .200. However, regular season and World Series team batting averages are currently trending down. 
+
+# Winning vs. Losing Teams 
+***
+
+## Winning/Losing Team WS Home Runs 
+
+```{r, echo=FALSE,results='hide',fig.keep='all'}
+Reg_WS_Batting %>% ggplot(aes(x = Total_WS_HR, fill = `Won/Lost`)) +
   geom_boxplot(alpha = .3) +
-  labs(title = "Total HR Hit") +
-  xlab("") +
-  ylab("Total Home Runs Hit") +
-  facet_wrap(~games_played, labeller = labeller(games_played =
-                                                  c("4" = "4 Game Series",
-                                                    "5" = "5 Game Series",
-                                                    "6" = "6 Game Series",
-                                                    "7" = "7 Game Series")))
+  labs(title = "Total World Series HR",
+       subtitle = "(1903-2020)") +
+  xlab("Total HR") +
+  ylab("Won/Lost") +
+  theme(axis.text.y = element_blank()) +
+  theme_hc() +
+  scale_fill_hc()
 
 ```
+For Teams that WON the World Series: 
+-	Median total home runs hits is 4
+-	Maximum is 12
+-	One outlier with 15 home runs hit.
+-	More than half of the winning teams arehit more than 4 home runs
+For Teams that LOST the World Series
+-	Median total home runs hit is 3
+-	Maximum is 10 with 2 
+-	outliers at 11 and 14 home runs hit. 
 
 
 
+## Winning/Losing Team HR Density
 
-**What is the  relationship between batting average and at-bats per homerun ratio.**
-
-```{r}
-
-WS_Batting %>% group_by(yearID, teamID, games_played, Won.Lost) %>% 
-  summarize("Total_HR" = sum(HR),
-            'mean_Bat_Avg' = mean(Bat_Avg),
-            "mean_AB_HR" = mean(AB_HR)) %>%
-  ggplot(aes(x = mean_Bat_Avg, y = mean_AB_HR, color = Won.Lost)) +
-  geom_point(alpha = .7) +
-  geom_smooth() +
-  facet_wrap(~ Won.Lost) +
-  labs(title = "Batting Avg vs. AB per HR Ratio") +
-  xlab("Team Batting Average") +
-  ylab("At-bat per Home Run Ratio") +
-  facet_wrap(~games_played, labeller = labeller(games_played =
-                                                  c("4" = "4 Game Series",
-                                                    "5" = "5 Game Series",
-                                                    "6" = "6 Game Series",
-                                                    "7" = "7 Game Series")))
-
-```
-
-There is no discernible trend between mean batting average and mean at-bat per home run ratio between winning and 
-losing teams. However, with the use of a line, we can see that winning teams have a 'flatter' line. This flat line 
-tells us that winning team's at-bat per home run ratio is more evenly distributed among their batting average.
-
-
-
-**With what frequency are winning teams hitting home runs**
-
-
-```{r}
-
-WS_Batting %>% group_by(yearID, teamID, games_played, Won.Lost) %>% 
-  summarize("Total_HR" = sum(HR),
-            'mean_Bat_Avg' = mean(Bat_Avg),
-            "mean_AB_HR" = mean(AB_HR)) %>%
-  ggplot(aes(x = Total_HR, fill = Won.Lost)) +
+```{r, echo=FALSE,results='hide',fig.keep='all'}
+Reg_WS_Batting %>% ggplot(aes(x = Total_WS_HR, fill = `Won/Lost`)) +
   geom_density(alpha = .3) +
-  #facet_wrap(~ Won.Lost) +
-  labs(title = "Total Home Runs Hit") +
-  xlab("Number of Home Runs") +
-  facet_wrap(~games_played, labeller = labeller(games_played =
-                                                  c("4" = "4 Game Series",
-                                                    "5" = "5 Game Series",
-                                                    "6" = "6 Game Series",
-                                                    "7" = "7 Game Series")))
+  labs(title = "Total World Series HR",
+       subtitle = "(1903-2020)") +
+  xlab("Total HR") +
+  theme_hc() +
+  scale_fill_hc()
 
 ```
+A density plot of this same data shows us that winning teams are hitting 5 or more home runs more frequently, than the losing teams.
+And in contrast the losing teams are hitting less than 5 home runs more frequently than the winning team. 
+We can determine that hitting 5 or more total home runs during the World Series increases a teams chances of winning.
 
-**What is this graph telling us?**
-The frequency in total number of home runs hit by losing and winning teams hit home runs is very identical.
+## Winning/Losing Team WS Batting AVG
+
+```{r, echo=FALSE,results='hide',fig.keep='all'}
+Reg_WS_Batting %>% ggplot(aes(x = Team_WS_AVG, fill = `Won/Lost`)) +
+  geom_boxplot(alpha = .3) +
+  labs(title = "Team WS Batting AVG",
+       subtitle = "(1903-2020)") +
+  xlab("Batting AVG") +
+  theme(axis.text.y = element_blank()) +
+  ylab("") +
+  theme_hc() +
+  scale_fill_hc()
+
+```
+Teams that WON the World Series:
+-	higher minimum, median, and maximum world series team batting averages
+-	even the outliers are higher 
+-	More than 50 % of teams are batting higher than a .200 batting average
+Teams that LOST the World Series
+-	Maximum batting average doesn’t even reach .300 and even the maximum outliers, only one exceeds the maximum of the winning teams batting average
+-	More than half of the losing teams are batting lower than a .200 average
 
 
+## Winning/Losing Teams AVG Density
 
-```{r}
-
-WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
-  summarize("Total_HR" = sum(HR),
-            'mean_Bat_Avg' = mean(Bat_Avg),
-            "mean_AB_HR" = mean(AB_HR)) %>%
-  ggplot(aes(x = mean_Bat_Avg, fill = Won.Lost)) +
+```{r, echo=FALSE,results='hide',fig.keep='all'}
+Reg_WS_Batting %>% ggplot(aes(x = Team_WS_AVG, fill = `Won/Lost`)) +
   geom_density(alpha = .3) +
-  #facet_wrap(~ Won.Lost) +
-  labs(title = "Team Batting Average") +
-  xlab("Team Batting Average")
+  labs(title = "World Series Batting AVG",
+       subtitle = "(1903-2020)") +
+  xlab("AVG") +
+  theme_hc() +
+  scale_fill_hc()
 
 ```
-
-The winning teams hit for a higher batting average more frequently than the losing teams.
-
-
-## Frequency of At-bats per home run ratio
-
-**With what frequency are winning teams hitting home runs**
+Winning teams are batting for an average higher than .200 more frequently than the losing teams.
+Losing teams are batting for an average less than .200 more frequently than the winning teams.
 
 
-```{r}
+## Summary of Results  
+***
 
-WS_Batting %>% group_by(yearID, teamID, Won.Lost) %>% 
-  summarize("Total_HR" = sum(HR),
-            'mean_Bat_Avg' = mean(Bat_Avg),
-            "mean_AB_HR" = mean(AB_HR)) %>%
-  ggplot(aes(x = mean_AB_HR, fill = Won.Lost)) +
-  geom_density(alpha = .3) +
-  #facet_wrap(~ Won.Lost) +
-  labs(title = "At-Bats Per Home Run Ratio") +
-  xlab("AB per HR Ratio")
+As far as trends in total home runs being hit during the regular season, we have seen an increase in home runs and are likely to continue to see an increase in the future.
 
-```
-## Results and Conclusion
+Trends for team batting averages, however, have been more unpredictable, but we are currently in a decreasing trend. Will we see batting averages continue to fall? It’s hard to tell from this data exploration. 
 
-There have been a total of 39 World Series' from 1922-2020 in which a seventh game was needed to crown
-a champion. 
+As for which statistic is more valuable when trying to win the world series? Well, they both are. However, given the data exploration, an argument could be made that batting average is more valuable. The data and graphs revealed that there is greater variation in minimum, median, and maximum batting averages for winning teams, than for losing teams.
 
-### Trends
-We can see different trends for total home runs hit, team batting average,  and at-bat per home run ratios
-during this time. 
+Hitting home runs is the only way in baseball that guarantees at least one run will score, however, higher batting averages produce more opportunities for scoring. A higher batting average will also result in success given those scoring opportunities, and when it comes to winning the World Series, producing as many scoring opportunities as possible is slightly more advantageous than hitting home runs. 
 
-**Total Home Runs Hit** - With the exception of the the dip in home runs hit 
+
+## Limitations of our Analysis
+***
+
+There are many other variables to consider. There’s a plethora of other traditional batting statistics and advanced batting statistics as well, many of which have just been discovered in the last few years.
+
+We also have to consider that baseball is not just about batting. On the other side of batting, we have pitching, which has just has many variables as batting, if not more. There is even "fielding" statistics, "batter vs pitcher" statistics, "base running" statistics, "stadium" statistics, the list goes on.
+
+Any one of these variables, or combination of them may be better at looking for our answers. And of course, there is always the element of luck. For all the data and statistics in baseball , sometimes the odds are defied, and the improbable happens. 
+
+
+
+
+

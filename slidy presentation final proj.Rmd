@@ -20,6 +20,12 @@ library(Lahman)
 ## Introduction
 
 
+* **We will be looking at:**
+
+  + Trends in Home Runs and Batting Average
+  
+  + What role do these statistics play in the World Series
+
 ![](https://www.historyamerica.us/01/images/products/large/history-of-american-baseball-poster.jpg)
 
 
