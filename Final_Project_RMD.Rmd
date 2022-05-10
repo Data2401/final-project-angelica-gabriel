@@ -1,7 +1,7 @@
 ---
 title: "Batting to Win"
 author: "Angelica Morales & Gabriel Rodriguez"
-date: "4/24/2022"
+date: "5/10/2022"
 output: html_document
 ---
 # Introduction
